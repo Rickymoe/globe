@@ -12,9 +12,10 @@ export function initTerrain(scene) {
 
   const geo = new THREE.SphereGeometry(100, 64, 64)
 
-  // Back faces rendered first — MeshBasicMaterial so lighting doesn't darken far side
+  // Back faces rendered first — cool blue tint signals "far side" depth cue
   _backMesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
     map: colorMap,
+    color: 0x7799cc,
     side: THREE.BackSide,
     transparent: true,
     opacity: 0,
@@ -32,6 +33,18 @@ export function initTerrain(scene) {
     opacity: 1.0,
   }))
   scene.add(_terrainMesh)
+
+  // Atmosphere rim — BackSide sphere larger than globe; visible only at limb (rim glow)
+  scene.add(new THREE.Mesh(
+    new THREE.SphereGeometry(107, 64, 32),
+    new THREE.MeshBasicMaterial({
+      color: 0x1155dd,
+      side: THREE.BackSide,
+      transparent: true,
+      opacity: 0.35,
+      depthWrite: false,
+    })
+  ))
 
   // Water sphere
   _waterMesh = new THREE.Mesh(
