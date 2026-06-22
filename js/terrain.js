@@ -37,11 +37,12 @@ export function initTerrain(scene) {
 }
 
 export function setSeaLevel(value) {
-  // value 0–100 → sphere scale 0.985–1.015
+  if (!_waterMesh) return
   const scale = 0.985 + (value / 100) * 0.03
   _waterMesh.scale.setScalar(scale)
 }
 
 export function setOpacity(transparent) {
+  if (!_terrainMesh) return
   _terrainMesh.material.opacity = transparent ? 0.25 : 1.0
 }
