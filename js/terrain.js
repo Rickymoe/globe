@@ -9,7 +9,7 @@ export function initTerrain(scene) {
 
   const colorMap    = loader.load(BASE + 'earth_atmos_2048.jpg')
   const normalMap   = loader.load(BASE + 'earth_normal_2048.jpg')
-  const displacementMap = loader.load(BASE + 'earth_bump_2048.jpg')
+  const displacementMap = loader.load(BASE + 'earth_specular_2048.jpg')
 
   const terrainGeo = new THREE.SphereGeometry(100, 256, 256)
   const terrainMat = new THREE.MeshStandardMaterial({
