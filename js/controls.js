@@ -1,6 +1,6 @@
 const WIND_ARROWS = ['→', '↗', '↑', '↖', '←', '↙', '↓', '↘']
 
-export function initControls({ onSeaLevel, onOpacity, onWeatherToggle, onWeatherRefresh, onGravity, onWind }) {
+export function initControls({ onSeaLevel, onOpacity, onWeatherToggle, onWeatherRefresh, onGravity, onWind, onReset }) {
   const seaSlider      = document.getElementById('sea-level')
   const gravSlider     = document.getElementById('gravity')
   const windSlider     = document.getElementById('wind-direction')
@@ -21,6 +21,7 @@ export function initControls({ onSeaLevel, onOpacity, onWeatherToggle, onWeather
   chkTransparent.addEventListener('change', () => onOpacity(chkTransparent.checked))
   chkClouds.addEventListener('change', () => onWeatherToggle(chkClouds.checked))
   btnRefresh.addEventListener('click', onWeatherRefresh)
+  document.getElementById('compass').addEventListener('click', onReset)
 
   // fire initial values so modules sync with default slider positions
   onSeaLevel(Number(seaSlider.value))

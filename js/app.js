@@ -1,4 +1,4 @@
-import { initScene, startLoop } from './globe.js'
+import { initScene, startLoop, resetCamera, getCompassAngle } from './globe.js'
 import { initTerrain, setSeaLevel, setOpacity } from './terrain.js'
 import { initWeather, fetchCloudTiles, setWeatherVisible } from './weather.js'
 import { setGravity, setWindDirection } from './particles.js'
@@ -11,6 +11,8 @@ function main() {
   initTerrain(scene)
   initWeather(scene)
 
+  const needle = document.getElementById('compass-needle')
+
   initControls({
     onSeaLevel: setSeaLevel,
     onOpacity: setOpacity,
@@ -21,9 +23,12 @@ function main() {
     },
     onGravity: setGravity,
     onWind: setWindDirection,
+    onReset: resetCamera,
   })
 
-  startLoop(() => {})
+  startLoop(() => {
+    needle.style.transform = `rotate(${getCompassAngle()}deg)`
+  })
 }
 
 main()

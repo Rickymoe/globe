@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let _scene, _camera, _renderer, _controls, _clock
+let _resetting = false
+const DEFAULT_CAM = new THREE.Vector3(0, 0, 250)
 
 export function initScene(container) {
   _scene = new THREE.Scene()
@@ -43,6 +45,19 @@ export function initScene(container) {
   return { scene: _scene }
 }
 
+export function resetCamera() {
+  _resetting = true
+}
+
+export function getCompassAngle() {
+  if (!_camera) return 0
+  const right = new THREE.Vector3()
+  const up = new THREE.Vector3()
+  _camera.matrixWorld.extractBasis(right, up, new THREE.Vector3())
+  const north = new THREE.Vector3(0, 1, 0)
+  return Math.atan2(north.dot(right), north.dot(up)) * (180 / Math.PI)
+}
+
 function _addStars(scene) {
   const positions = new Float32Array(3000 * 3)
   for (let i = 0; i < positions.length; i += 3) {
@@ -67,6 +82,13 @@ export function startLoop(onFrame) {
   function animate() {
     rafId = requestAnimationFrame(animate)
     const delta = _clock.getDelta()
+    if (_resetting) {
+      _camera.position.lerp(DEFAULT_CAM, 0.08)
+      if (_camera.position.distanceTo(DEFAULT_CAM) < 0.5) {
+        _camera.position.copy(DEFAULT_CAM)
+        _resetting = false
+      }
+    }
     _controls.update()
     onFrame(delta)
     _renderer.render(_scene, _camera)

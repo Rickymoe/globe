@@ -11,6 +11,54 @@ body {
 
 #canvas-container {
   flex: 1;
+  position: relative;
+}
+
+#compass {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.55);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: border-color 0.2s;
+}
+
+#compass:hover { border-color: rgba(255,255,255,0.6); }
+
+#compass-needle {
+  position: absolute;
+  width: 3px;
+  height: 34px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, #ff4444 50%, #888 50%);
+  transform-origin: center center;
+}
+
+.compass-n {
+  position: absolute;
+  top: 3px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #ff4444;
+  font-family: system-ui, sans-serif;
+  pointer-events: none;
+}
+
+.compass-s {
+  position: absolute;
+  bottom: 3px;
+  font-size: 9px;
+  color: #666;
+  font-family: system-ui, sans-serif;
+  pointer-events: none;
 }
 
 #canvas-container canvas {
