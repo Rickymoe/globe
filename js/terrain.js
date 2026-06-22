@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 const BASE = 'https://threejs.org/examples/textures/planets/'
 
-let _terrainMesh, _backMesh, _waterMesh, _wireMesh
+let _terrainMesh, _backMesh, _waterMesh
 
 export function initTerrain(scene) {
   const loader = new THREE.TextureLoader()
@@ -33,19 +33,6 @@ export function initTerrain(scene) {
   }))
   scene.add(_terrainMesh)
 
-  // Lat/lon grid lines — visible in transparent mode
-  _wireMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(100.5, 36, 18),
-    new THREE.MeshBasicMaterial({
-      color: 0x88ccff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.12,
-    })
-  )
-  _wireMesh.visible = false
-  scene.add(_wireMesh)
-
   // Water sphere
   _waterMesh = new THREE.Mesh(
     new THREE.SphereGeometry(101, 64, 64),
@@ -70,10 +57,8 @@ export function setOpacity(transparent) {
   if (transparent) {
     _terrainMesh.material.opacity = 0.45
     _backMesh.material.opacity = 0.55
-    _wireMesh.visible = true
   } else {
     _terrainMesh.material.opacity = 1.0
     _backMesh.material.opacity = 0
-    _wireMesh.visible = false
   }
 }
