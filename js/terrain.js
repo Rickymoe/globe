@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 const BASE = 'https://threejs.org/examples/textures/planets/'
 
-let _terrainMesh, _waterMesh
+let _terrainMesh, _waterMesh, _wireMesh
 
 export function initTerrain(scene) {
   const loader = new THREE.TextureLoader()
@@ -21,6 +21,17 @@ export function initTerrain(scene) {
   })
   _terrainMesh = new THREE.Mesh(terrainGeo, terrainMat)
   scene.add(_terrainMesh)
+
+  const wireGeo = new THREE.SphereGeometry(100.5, 36, 36)
+  const wireMat = new THREE.MeshBasicMaterial({
+    color: 0x44aaff,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.18,
+  })
+  _wireMesh = new THREE.Mesh(wireGeo, wireMat)
+  _wireMesh.visible = false
+  scene.add(_wireMesh)
 
   const waterGeo = new THREE.SphereGeometry(101, 64, 64)
   const waterMat = new THREE.MeshPhongMaterial({
@@ -41,5 +52,6 @@ export function setSeaLevel(value) {
 
 export function setOpacity(transparent) {
   if (!_terrainMesh) return
-  _terrainMesh.material.opacity = transparent ? 0.25 : 1.0
+  _terrainMesh.material.opacity = transparent ? 0.45 : 1.0
+  _wireMesh.visible = transparent
 }
