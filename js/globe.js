@@ -12,6 +12,8 @@ export function initScene(container) {
   _camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000)
   _camera.position.z = 250
 
+  _addStars(_scene)
+
   _renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
   _renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   _renderer.setSize(w, h)
@@ -39,6 +41,24 @@ export function initScene(container) {
   })
 
   return { scene: _scene }
+}
+
+function _addStars(scene) {
+  const positions = new Float32Array(3000 * 3)
+  for (let i = 0; i < positions.length; i += 3) {
+    const theta = Math.random() * Math.PI * 2
+    const phi = Math.acos(2 * Math.random() - 1)
+    const r = 600 + Math.random() * 200
+    positions[i]     = r * Math.sin(phi) * Math.cos(theta)
+    positions[i + 1] = r * Math.sin(phi) * Math.sin(theta)
+    positions[i + 2] = r * Math.cos(phi)
+  }
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  const stars = new THREE.Points(geo, new THREE.PointsMaterial({
+    color: 0xffffff, size: 0.7, sizeAttenuation: true,
+  }))
+  scene.add(stars)
 }
 
 export function startLoop(onFrame) {
