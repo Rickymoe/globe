@@ -93,6 +93,7 @@ body {
 #transparent-toggle { right: 24px; }
 #borders-toggle     { right: 176px; }
 #clouds-toggle      { right: 328px; }
+#labels-toggle      { right: 480px; }
 
 .toggle-track {
   width: 38px;

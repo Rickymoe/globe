@@ -4,6 +4,7 @@ import { initWeather, fetchCloudTiles, setWeatherVisible } from './weather.js'
 import { setGravity, setWindDirection } from './particles.js'
 import { initControls } from './controls.js'
 import { initBorders, setBordersVisible } from './borders.js'
+import { initLabels, setLabelsVisible } from './labels.js'
 
 function main() {
   const container = document.getElementById('canvas-container')
@@ -12,6 +13,7 @@ function main() {
   initTerrain(scene)
   initWeather(scene)
   initBorders(scene)
+  initLabels(scene)
 
   const needle = document.getElementById('compass-needle')
 
@@ -19,13 +21,11 @@ function main() {
     onSeaLevel: setSeaLevel,
     onOpacity: setOpacity,
     onWeatherToggle: setWeatherVisible,
-    onWeatherRefresh: () => {
-      const key = document.getElementById('owm-api-key').value.trim()
-      if (key) fetchCloudTiles(key)
-    },
+    onWeatherRefresh: () => {},
     onGravity: setGravity,
     onWind: setWindDirection,
     onBorders: setBordersVisible,
+    onLabels: setLabelsVisible,
     onReset: resetCamera,
   })
 
