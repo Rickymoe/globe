@@ -12,11 +12,12 @@ const NAMES = {
   170:'Colombia', 178:'Congo', 180:'DR Congo', 188:'Costa Rica', 192:'Cuba',
   203:'Czechia', 208:'Denmark', 218:'Ecuador', 818:'Egypt', 231:'Ethiopia',
   246:'Finland', 250:'France', 266:'Gabon', 276:'Germany', 288:'Ghana',
-  300:'Greece', 320:'Guatemala', 332:'Haiti', 340:'Honduras', 348:'Hungary',
-  356:'India', 360:'Indonesia', 364:'Iran', 368:'Iraq', 372:'Ireland',
-  376:'Israel', 380:'Italy', 392:'Japan', 400:'Jordan', 398:'Kazakhstan',
-  404:'Kenya', 408:'N. Korea', 410:'S. Korea', 418:'Laos', 422:'Lebanon',
-  434:'Libya', 466:'Mali', 478:'Mauritania', 484:'Mexico', 496:'Mongolia',
+  300:'Greece', 304:'Greenland', 320:'Guatemala', 332:'Haiti', 340:'Honduras',
+  348:'Hungary', 352:'Iceland', 356:'India', 360:'Indonesia', 364:'Iran',
+  368:'Iraq', 372:'Ireland', 376:'Israel', 380:'Italy', 392:'Japan',
+  400:'Jordan', 398:'Kazakhstan', 404:'Kenya', 408:'N. Korea', 410:'S. Korea',
+  418:'Laos', 422:'Lebanon', 434:'Libya', 442:'Luxembourg', 466:'Mali',
+  478:'Mauritania', 484:'Mexico', 458:'Malaysia', 496:'Mongolia',
   504:'Morocco', 508:'Mozambique', 516:'Namibia', 524:'Nepal',
   528:'Netherlands', 554:'New Zealand', 558:'Nicaragua', 562:'Niger',
   566:'Nigeria', 578:'Norway', 586:'Pakistan', 591:'Panama', 600:'Paraguay',
@@ -31,6 +32,23 @@ const NAMES = {
   233:'Estonia', 268:'Georgia', 428:'Latvia', 498:'Moldova',
   703:'Slovakia', 705:'Slovenia', 450:'Madagascar', 512:'Oman',
   634:'Qatar', 417:'Kyrgyzstan', 762:'Tajikistan', 795:'Turkmenistan',
+}
+
+// Manual [lon, lat] overrides for countries where auto-centroid is inaccurate
+// (elongated shapes, antimeridian-crossing, island chains, etc.)
+const CENTROID_OVERRIDE = {
+  578: [10,   65],  // Norway — narrow coastal strip, auto-centroid lands in Sweden
+  304: [-42,  72],  // Greenland — not in topojson features, placed manually
+  352: [-18,  65],  // Iceland
+  152: [-71, -33],  // Chile — very elongated N-S, centroid drifts into Argentina
+  124: [-96,  58],  // Canada — antimeridian + Nunavut skew
+  643: [ 55,  62],  // Russia — antimeridian split
+  840: [-100, 40],  // USA — Alaska pulls centroid far west
+  360: [113,  -1],  // Indonesia — island chain, centroid falls in sea
+  608: [122,  12],  // Philippines — island chain
+  554: [171, -42],  // New Zealand — two islands, centroid in sea
+  826: [ -2,  54],  // UK — centroid drifts into North Sea
+  458: [110,   4],  // Malaysia — split between peninsula and Borneo
 }
 
 function latLonToVec3(lat, lon) {
@@ -94,15 +112,20 @@ export async function initLabels(scene) {
     const name = NAMES[Number(f.id)]
     if (!name) continue
 
-    const geom = f.geometry
-    let ring
-    if (geom.type === 'Polygon') {
-      ring = geom.coordinates[0]
+    const id = Number(f.id)
+    let lon, lat
+    if (CENTROID_OVERRIDE[id]) {
+      ;[lon, lat] = CENTROID_OVERRIDE[id]
     } else {
-      ring = geom.coordinates.map(p => p[0]).reduce((a, b) => b.length > a.length ? b : a)
+      const geom = f.geometry
+      let ring
+      if (geom.type === 'Polygon') {
+        ring = geom.coordinates[0]
+      } else {
+        ring = geom.coordinates.map(p => p[0]).reduce((a, b) => b.length > a.length ? b : a)
+      }
+      ;[lon, lat] = ringCentroid(ring)
     }
-
-    const [lon, lat] = ringCentroid(ring)
     const sprite = makeLabelSprite(name)
     sprite.position.copy(latLonToVec3(lat, lon))
     _group.add(sprite)
