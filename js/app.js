@@ -3,6 +3,7 @@ import { initTerrain, setSeaLevel, setOpacity } from './terrain.js'
 import { initWeather, fetchCloudTiles, setWeatherVisible } from './weather.js'
 import { setGravity, setWindDirection } from './particles.js'
 import { initControls } from './controls.js'
+import { initBorders } from './borders.js'
 
 function main() {
   const container = document.getElementById('canvas-container')
@@ -10,6 +11,7 @@ function main() {
 
   initTerrain(scene)
   initWeather(scene)
+  initBorders(scene)
 
   const needle = document.getElementById('compass-needle')
 
