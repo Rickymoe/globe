@@ -1,10 +1,11 @@
-import { initScene, startLoop, resetCamera, getCompassAngle } from './globe.js'
+import { initScene, startLoop, resetCamera, getCompassAngle, getCamera, getControls, getCanvas } from './globe.js'
 import { initTerrain, setSeaLevel, setOpacity } from './terrain.js'
 import { initWeather, fetchCloudTiles, setWeatherVisible } from './weather.js'
 import { setGravity, setWindDirection } from './particles.js'
 import { initControls } from './controls.js'
 import { initBorders, setBordersVisible } from './borders.js'
 import { initLabels, setLabelsVisible } from './labels.js'
+import { initDragger, setDragMode } from './dragger.js'
 
 function main() {
   const container = document.getElementById('canvas-container')
@@ -14,6 +15,7 @@ function main() {
   initWeather(scene)
   initBorders(scene)
   initLabels(scene)
+  initDragger(scene, getCamera(), getControls(), getCanvas())
 
   const needle = document.getElementById('compass-needle')
 
@@ -26,6 +28,7 @@ function main() {
     onWind: setWindDirection,
     onBorders: setBordersVisible,
     onLabels: setLabelsVisible,
+    onDragMode: setDragMode,
     onReset: resetCamera,
   })
 

@@ -7,7 +7,8 @@ function makeToggle(id, onChange) {
   return el
 }
 
-export function initControls({ onSeaLevel, onOpacity, onWeatherToggle, onWeatherRefresh, onGravity, onWind, onBorders, onLabels, onReset }) {
+export function initControls({ onSeaLevel, onOpacity, onWeatherToggle, onWeatherRefresh, onGravity, onWind, onBorders, onLabels, onDragMode, onReset }) {
+  const dragToggle        = makeToggle('drag-toggle',        onDragMode)
   const labelsToggle      = makeToggle('labels-toggle',      onLabels)
   const cloudsToggle      = makeToggle('clouds-toggle',      onWeatherToggle)
   const bordersToggle     = makeToggle('borders-toggle',     onBorders)
@@ -15,6 +16,7 @@ export function initControls({ onSeaLevel, onOpacity, onWeatherToggle, onWeather
 
   document.getElementById('compass')?.addEventListener('click', onReset)
 
+  onDragMode(dragToggle.classList.contains('active'))
   onLabels(labelsToggle.classList.contains('active'))
   onWeatherToggle(cloudsToggle.classList.contains('active'))
   onBorders(bordersToggle.classList.contains('active'))

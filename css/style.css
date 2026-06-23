@@ -94,6 +94,7 @@ body {
 #borders-toggle     { right: 176px; }
 #clouds-toggle      { right: 328px; }
 #labels-toggle      { right: 480px; }
+#drag-toggle        { right: 632px; }
 
 .toggle-track {
   width: 38px;

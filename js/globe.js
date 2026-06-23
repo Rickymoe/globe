@@ -45,6 +45,10 @@ export function initScene(container) {
   return { scene: _scene }
 }
 
+export function getCamera()   { return _camera }
+export function getControls() { return _controls }
+export function getCanvas()   { return _renderer.domElement }
+
 export function resetCamera() {
   _resetting = true
 }
