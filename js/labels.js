@@ -97,6 +97,12 @@ function makeLabelSprite(text) {
   return sprite
 }
 
+// Extra labels for regions/territories not in the topojson as separate countries
+// Each entry: [name, lon, lat]
+const MANUAL_LABELS = [
+  ['Alaska', -153, 64],
+]
+
 let _group = null
 
 export async function initLabels(scene) {
@@ -109,10 +115,10 @@ export async function initLabels(scene) {
   ).then(r => r.json())
 
   for (const f of feature(world, world.objects.countries).features) {
-    const name = NAMES[Number(f.id)]
+    const id = Number(f.id)
+    const name = NAMES[id]
     if (!name) continue
 
-    const id = Number(f.id)
     let lon, lat
     if (CENTROID_OVERRIDE[id]) {
       ;[lon, lat] = CENTROID_OVERRIDE[id]
@@ -126,6 +132,12 @@ export async function initLabels(scene) {
       }
       ;[lon, lat] = ringCentroid(ring)
     }
+    const sprite = makeLabelSprite(name)
+    sprite.position.copy(latLonToVec3(lat, lon))
+    _group.add(sprite)
+  }
+
+  for (const [name, lon, lat] of MANUAL_LABELS) {
     const sprite = makeLabelSprite(name)
     sprite.position.copy(latLonToVec3(lat, lon))
     _group.add(sprite)
