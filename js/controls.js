@@ -7,20 +7,20 @@ function makeToggle(id, onChange) {
   return el
 }
 
-export function initControls({ onSeaLevel, onOpacity, onWeatherToggle, onWeatherRefresh, onGravity, onWind, onBorders, onLabels, onDragMode, onEquator, onReset }) {
+export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEquator, onCapitals, onReset }) {
   const dragToggle        = makeToggle('drag-toggle',        onDragMode)
   const labelsToggle      = makeToggle('labels-toggle',      onLabels)
-  const cloudsToggle      = makeToggle('clouds-toggle',      onWeatherToggle)
   const bordersToggle     = makeToggle('borders-toggle',     onBorders)
   const transparentToggle = makeToggle('transparent-toggle', onOpacity)
   const equatorToggle     = makeToggle('equator-toggle',     onEquator)
+  const capitalsToggle    = makeToggle('capitals-toggle',    onCapitals)
 
   document.getElementById('compass')?.addEventListener('click', onReset)
 
   onDragMode(dragToggle.classList.contains('active'))
   onLabels(labelsToggle.classList.contains('active'))
-  onWeatherToggle(cloudsToggle.classList.contains('active'))
   onBorders(bordersToggle.classList.contains('active'))
   onOpacity(transparentToggle.classList.contains('active'))
   onEquator(equatorToggle.classList.contains('active'))
+  onCapitals(capitalsToggle.classList.contains('active'))
 }
