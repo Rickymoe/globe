@@ -25,7 +25,7 @@ function starLayer(count, radius, size, opacity) {
 }
 
 export function initStars(scene) {
-  scene.add(starLayer(1800, 900, 1.2, 0.55))  // mange svake, langt unna
-  scene.add(starLayer( 600, 800, 1.9, 0.80))  // middels
-  scene.add(starLayer( 120, 700, 2.8, 1.00))  // få klare
+  scene.add(starLayer(1800, 90000, 1.2, 0.55))
+  scene.add(starLayer( 600, 87000, 1.9, 0.80))
+  scene.add(starLayer( 120, 85000, 2.8, 1.00))
 }

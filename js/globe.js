@@ -5,23 +5,39 @@ let _scene, _camera, _renderer, _controls, _clock
 let _resetting = false
 let _ambient, _sunLight, _sunVisual, _moon
 let _lastSunMinute = -1
-const SUN_RADIUS = 380
+const SUN_RADIUS = 2000   // 1 AU
 const MOON_ORBIT = 200
-const MOON_TILT  = 22 * Math.PI / 180
+
+function solarParams() {
+  const now = new Date()
+  const dayFraction = (now.getUTCHours() * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds()) / 86400
+  const hourAngle   = (dayFraction - 0.5) * 2 * Math.PI
+  const dayOfYear   = Math.floor((now - new Date(Date.UTC(now.getUTCFullYear(), 0, 1))) / 86400000)
+  const decl        = -23.5 * Math.cos((dayOfYear + 10) / 365 * 2 * Math.PI) * Math.PI / 180
+  return { hourAngle, decl }
+}
 
 function calcSunPosition() {
-  const now = new Date()
-  // UTC time — globe texture is aligned to Greenwich meridian
-  const dayFraction = (now.getUTCHours() * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds()) / 86400
-  const hourAngle   = (dayFraction - 0.5) * 2 * Math.PI   // UTC noon=0, midnight=±π
-
-  const dayOfYear = Math.floor((now - new Date(Date.UTC(now.getUTCFullYear(), 0, 1))) / 86400000)
-  const decl = -23.5 * Math.cos((dayOfYear + 10) / 365 * 2 * Math.PI) * Math.PI / 180
-
+  const { hourAngle, decl } = solarParams()
   return new THREE.Vector3(
     Math.cos(hourAngle) * SUN_RADIUS,
     Math.sin(decl)      * SUN_RADIUS,
     Math.sin(hourAngle) * SUN_RADIUS,
+  )
+}
+
+function calcMoonPosition() {
+  // Synodic period, reference new moon 2000-01-06T18:14Z
+  const REF_NEW_MOON = Date.UTC(2000, 0, 6, 18, 14)
+  const SYNODIC_MS   = 29.530589 * 86400000
+  const phase = ((Date.now() - REF_NEW_MOON) % SYNODIC_MS) / SYNODIC_MS  // 0=new, 0.5=full
+
+  const { hourAngle, decl } = solarParams()
+  const moonAngle = hourAngle + phase * 2 * Math.PI  // offset from sun by phase
+  return new THREE.Vector3(
+    Math.cos(moonAngle) * MOON_ORBIT,
+    Math.sin(decl)      * MOON_ORBIT * 0.8,  // approximate same ecliptic tilt
+    Math.sin(moonAngle) * MOON_ORBIT,
   )
 }
 const DEFAULT_CAM = new THREE.Vector3(0, 0, 250)
@@ -32,7 +48,7 @@ export function initScene(container) {
 
   const w = container.clientWidth || window.innerWidth
   const h = container.clientHeight || window.innerHeight
-  _camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000)
+  _camera = new THREE.PerspectiveCamera(45, w / h, 1, 150000)
   _camera.position.z = 250
 
   _renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -44,7 +60,7 @@ export function initScene(container) {
   _controls.enableDamping = true
   _controls.dampingFactor = 0.05
   _controls.minDistance = 120
-  _controls.maxDistance = 500
+  _controls.maxDistance = 80000
 
   _ambient = new THREE.AmbientLight(0xffffff, 1.0)
   _scene.add(_ambient)
@@ -70,7 +86,7 @@ export function initScene(container) {
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   }))
-  _sunVisual.scale.set(90, 90, 1)
+  _sunVisual.scale.set(160, 160, 1)
   _sunVisual.position.copy(_sunLight.position)
   _sunVisual.visible = false
   _scene.add(_sunVisual)
@@ -83,11 +99,7 @@ export function initScene(container) {
     tex => { moonMat.map = tex; moonMat.needsUpdate = true }
   )
   _moon = new THREE.Mesh(moonGeo, moonMat)
-  _moon.position.set(
-    Math.cos(0.8) * MOON_ORBIT,
-    Math.sin(0.8) * MOON_ORBIT * Math.sin(MOON_TILT),
-    Math.sin(0.8) * MOON_ORBIT * Math.cos(MOON_TILT),
-  )
+  _moon.position.copy(calcMoonPosition())
   _scene.add(_moon)
 
   window.addEventListener('resize', () => {
@@ -144,12 +156,13 @@ export function startLoop(onFrame) {
       }
     }
     if (_sunLight?.visible) {
-      const m = new Date().getMinutes()
+      const m = new Date().getUTCMinutes()
       if (m !== _lastSunMinute) {
         _lastSunMinute = m
-        const pos = calcSunPosition()
-        _sunLight.position.copy(pos)
-        _sunVisual.position.copy(pos)
+        const sunPos = calcSunPosition()
+        _sunLight.position.copy(sunPos)
+        _sunVisual.position.copy(sunPos)
+        _moon?.position.copy(calcMoonPosition())
       }
     }
     _controls.update()

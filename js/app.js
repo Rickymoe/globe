@@ -9,6 +9,7 @@ import { initLatLines, setEquatorVisible } from './latlines.js'
 import { initCapitals, setCapitalsVisible } from './capitals.js'
 import { initWeatherClick, setWeatherClickEnabled } from './yr-weather.js'
 import { initStars } from './stars.js'
+import { initSolarSystem, setSolarSystemVisible } from './solar-system.js'
 
 function main() {
   const container = document.getElementById('canvas-container')
@@ -22,6 +23,7 @@ initBorders(scene)
   initLatLines(scene)
   initCapitals(scene, getCamera(), getCanvas())
   initWeatherClick(getCamera(), getCanvas())
+  initSolarSystem(scene)
 
   const needle = document.getElementById('compass-needle')
 
@@ -32,6 +34,7 @@ initBorders(scene)
     onDragMode: setDragMode,
     onEquator: setEquatorVisible,
     onCapitals: setCapitalsVisible,
+    onSolarSystem: setSolarSystemVisible,
     onSun: setSunEnabled,
     onWeatherClick: setWeatherClickEnabled,
     onReset: resetCamera,
