@@ -8,11 +8,13 @@ import { initDragger, setDragMode } from './dragger.js'
 import { initLatLines, setEquatorVisible } from './latlines.js'
 import { initCapitals, setCapitalsVisible } from './capitals.js'
 import { initWeatherClick, setWeatherClickEnabled } from './yr-weather.js'
+import { initStars } from './stars.js'
 
 function main() {
   const container = document.getElementById('canvas-container')
   const { scene } = initScene(container)
 
+  initStars(scene)
   initTerrain(scene)
 initBorders(scene)
   initLabels(scene)

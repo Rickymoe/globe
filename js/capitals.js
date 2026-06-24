@@ -65,6 +65,11 @@ function onPointerMove(e) {
 
   const hits = ray.intersectObject(_points)
   if (hits.length > 0) {
+    // Ignore capitals on the back side of the globe (occluded by sphere)
+    const camNorm = _camera.position.clone().normalize()
+    const hitNorm = hits[0].point.clone().normalize()
+    if (hitNorm.dot(camNorm) < 0.1) { _tooltip.style.display = 'none'; return }
+
     const { name } = _capitalsData[hits[0].index]
     _tooltip.textContent = name
     _tooltip.style.display = 'block'

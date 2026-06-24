@@ -24,17 +24,46 @@ function makeLatLine(lat, color, opacity) {
   }
   const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
-  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color, transparent: true, opacity }))
+
+  const front = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+    color, transparent: true, opacity,
+  }))
+  front.renderOrder = 1
+
+  const back = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+    color, transparent: true, opacity: opacity * 0.2,
+    depthTest: false, depthWrite: false,
+  }))
+  back.renderOrder = 0
+
+  const group = new THREE.Group()
+  group.add(back, front)
+  return group
 }
 
-const _lines = {}
+// Latitude lines — all controlled by one toggle
+const LINES = [
+  // Equator
+  { lat:   0,    color: 0x4fc3f7, opacity: 0.70 },
+  // Tropics (Cancer & Capricorn)
+  { lat:  23.5,  color: 0xffb74d, opacity: 0.55 },
+  { lat: -23.5,  color: 0xffb74d, opacity: 0.55 },
+  // Arctic & Antarctic circles
+  { lat:  66.5,  color: 0x90caf9, opacity: 0.45 },
+  { lat: -66.5,  color: 0x90caf9, opacity: 0.45 },
+]
+
+let _groups = []
 
 export function initLatLines(scene) {
-  _lines.equator = makeLatLine(0, 0x4fc3f7, 0.7)
-  _lines.equator.visible = false
-  scene.add(_lines.equator)
+  _groups = LINES.map(({ lat, color, opacity }) => {
+    const g = makeLatLine(lat, color, opacity)
+    g.visible = false
+    scene.add(g)
+    return g
+  })
 }
 
 export function setEquatorVisible(visible) {
-  if (_lines.equator) _lines.equator.visible = visible
+  _groups.forEach(g => { g.visible = visible })
 }
