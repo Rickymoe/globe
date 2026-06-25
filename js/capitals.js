@@ -108,6 +108,7 @@ export async function initCapitals(scene, camera, canvas) {
     sizeAttenuation: true,
     depthWrite: false,
   }))
+  _points.renderOrder = 1
   _points.visible = false
   scene.add(_points)
 
