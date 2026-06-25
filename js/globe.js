@@ -3,9 +3,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let _scene, _camera, _renderer, _controls, _clock
 let _resetting = false
-let _ambient, _sunLight, _sunVisual, _moon
+let _ambient, _sunLight, _sunVisual, _moon, _apolloMarker
 let _lastSunMinute = -1
 let _moonTipEnabled = false
+const _toEarth = new THREE.Vector3()
 const SUN_RADIUS = 2000   // 1 AU
 const MOON_ORBIT = 200
 
@@ -104,6 +105,15 @@ export function initScene(container) {
   _moon.position.copy(calcMoonPosition())
   _scene.add(_moon)
 
+  // Apollo 11 landing site — Earth-facing side of Moon
+  const apolloGeo = new THREE.BufferGeometry()
+  apolloGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3))
+  _apolloMarker = new THREE.Points(apolloGeo, new THREE.PointsMaterial({
+    size: 5, color: 0xFFD700, sizeAttenuation: true, depthWrite: false,
+  }))
+  _apolloMarker.renderOrder = 2
+  _scene.add(_apolloMarker)
+
   _initMoonTooltip(container)
 
   window.addEventListener('resize', () => {
@@ -138,7 +148,18 @@ function _initMoonTooltip(container) {
       ((e.clientX - rect.left) / rect.width)  *  2 - 1,
       ((e.clientY - rect.top)  / rect.height) * -2 + 1,
     )
+    ray.params.Points = { threshold: 4 }
     ray.setFromCamera(ndc, _camera)
+    if (_apolloMarker) {
+      const apolloHits = ray.intersectObject(_apolloMarker)
+      if (apolloHits.length) {
+        tip.innerHTML = '🚀 <b>Apollo 11</b><br><span style="color:#aaa;font-size:11px">Mare Tranquillitatis · 20. juli 1969</span>'
+        tip.style.display = 'block'
+        tip.style.left = (e.clientX - rect.left + 14) + 'px'
+        tip.style.top  = (e.clientY - rect.top  - 36) + 'px'
+        return
+      }
+    }
     if (!_moonTipEnabled) { tip.style.display = 'none'; return }
     const hits = ray.intersectObject(_moon)
     if (!hits.length) { tip.style.display = 'none'; return }
@@ -223,6 +244,10 @@ export function startLoop(onFrame) {
       }
     }
     _controls.update()
+    if (_apolloMarker && _moon) {
+      _toEarth.set(0, 0, 0).sub(_moon.position).normalize()
+      _apolloMarker.position.copy(_moon.position).addScaledVector(_toEarth, 9.5)
+    }
     onFrame(delta)
     _renderer.render(_scene, _camera)
   }
