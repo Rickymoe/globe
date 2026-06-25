@@ -62,6 +62,7 @@ export function initScene(container) {
   _controls.dampingFactor = 0.05
   _controls.minDistance = 120
   _controls.maxDistance = 80000
+  _controls.enablePan = false
 
   _ambient = new THREE.AmbientLight(0xffffff, 1.0)
   _scene.add(_ambient)
