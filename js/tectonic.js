@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 const R = 101.5
 let _lines = null
+let _visible = false
 
 function latLonToVec3(lat, lon) {
   const phi   = (90 - lat) * Math.PI / 180
@@ -46,9 +47,11 @@ export async function initTectonic(scene) {
     transparent: true,
     opacity: 0.85,
   }))
+  _lines.visible = _visible
   scene.add(_lines)
 }
 
 export function setTectonicVisible(visible) {
+  _visible = visible
   if (_lines) _lines.visible = visible
 }

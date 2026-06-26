@@ -3,8 +3,10 @@ import { mesh } from 'topojson-client'
 
 const R = 101.5  // above water sphere (r=101) so depth test passes correctly
 let _lines = null
+let _visible = false
 
 export function setBordersVisible(visible) {
+  _visible = visible
   if (_lines) _lines.visible = visible
 }
 
@@ -44,5 +46,6 @@ export async function initBorders(scene) {
     transparent: true,
     opacity: 0.8,
   }))
+  _lines.visible = _visible
   scene.add(_lines)
 }
