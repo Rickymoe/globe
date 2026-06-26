@@ -7,7 +7,7 @@ function makeToggle(id, onChange) {
   return el
 }
 
-export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEquator, onCapitals, onSolarSystem, onSun, onCityLights, onWeatherClick, onEarthquakes, onIss, onTectonic, onReset }) {
+export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEquator, onCapitals, onSolarSystem, onSun, onCityLights, onAurora, onWeatherClick, onEarthquakes, onIss, onTectonic, onReset }) {
   const dragToggle        = makeToggle('drag-toggle',        onDragMode)
   const labelsToggle      = makeToggle('labels-toggle',      onLabels)
   const bordersToggle     = makeToggle('borders-toggle',     onBorders)
@@ -17,6 +17,7 @@ export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEqu
   const solarToggle       = makeToggle('solar-toggle',       onSolarSystem)
   const sunToggle         = makeToggle('sun-toggle',         onSun)
   const cityLightsToggle  = makeToggle('citylights-toggle',  onCityLights)
+  const auroraToggle      = makeToggle('aurora-toggle',      onAurora)
   const weatherToggle     = makeToggle('weather-toggle',     onWeatherClick)
   const earthquakesToggle = makeToggle('earthquakes-toggle', onEarthquakes)
   const issToggle         = makeToggle('iss-toggle',         onIss)
@@ -33,6 +34,7 @@ export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEqu
   onSolarSystem(solarToggle.classList.contains('active'))
   onSun(sunToggle.classList.contains('active'))
   onCityLights(cityLightsToggle.classList.contains('active'))
+  onAurora(auroraToggle.classList.contains('active'))
   onWeatherClick(weatherToggle.classList.contains('active'))
   onEarthquakes(earthquakesToggle.classList.contains('active'))
   onIss(issToggle.classList.contains('active'))

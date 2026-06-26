@@ -9,6 +9,7 @@ import { initEarthquakes, setEarthquakesVisible, updateEarthquakes } from './ear
 import { initIss, setIssVisible } from './iss.js'
 import { initTectonic, setTectonicVisible } from './tectonic.js'
 import { initCityLights, setCityLightsVisible, updateCityLights } from './citylights.js'
+import { initAurora, setAuroraVisible, updateAurora } from './aurora.js'
 import { initLabels, setLabelsVisible } from './labels.js'
 import { initDragger, setDragMode } from './dragger.js'
 import { initLatLines, setEquatorVisible } from './latlines.js'
@@ -30,6 +31,7 @@ initBorders(scene)
   initIss(scene)
   initTectonic(scene)
   initCityLights(scene)
+  initAurora(scene)
   initLabels(scene)
   initDragger(scene, getCamera(), getControls(), getCanvas())
   initLatLines(scene)
@@ -49,6 +51,7 @@ initBorders(scene)
     onSolarSystem: setSolarSystemVisible,
     onSun: setSunEnabled,
     onCityLights: setCityLightsVisible,
+    onAurora: setAuroraVisible,
     onWeatherClick: v => { setWeatherClickEnabled(v); setMoonTempEnabled(v) },
     onEarthquakes: setEarthquakesVisible,
     onIss: setIssVisible,
@@ -61,6 +64,7 @@ initBorders(scene)
     updatePlanetScales(getCamera())
     updateEarthquakes(delta)
     updateCityLights(getSunDirection())
+    updateAurora(delta)
   })
 }
 
