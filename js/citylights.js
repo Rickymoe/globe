@@ -11,6 +11,7 @@ export function initCityLights(scene) {
     blending: THREE.AdditiveBlending,
     transparent: true,
     depthWrite: false,
+    depthTest: false,
   })
   _mesh = new THREE.Mesh(geo, mat)
   _mesh.visible = false
