@@ -1,0 +1,184 @@
+import * as THREE from 'three'
+
+const GEOCODE_URL = 'https://api.bigdatacloud.net/data/reverse-geocode-client'
+const COUNTRIES_URL = 'https://restcountries.com/v3.1/alpha'
+
+let _popup = null
+let _camera = null
+let _canvas = null
+let _enabled = false
+let _downPos = null
+
+function createPopup() {
+  const el = document.createElement('div')
+  el.style.cssText = [
+    'position:absolute',
+    'min-width:180px',
+    'max-width:240px',
+    'background:rgba(8,8,8,0.88)',
+    'color:#e0e0e0',
+    'border:1px solid rgba(255,255,255,0.18)',
+    'border-radius:14px',
+    'padding:13px 15px 11px',
+    'font-family:system-ui,sans-serif',
+    'font-size:13px',
+    'line-height:1.65',
+    'display:none',
+    'z-index:100',
+    'backdrop-filter:blur(6px)',
+    'pointer-events:auto',
+  ].join(';')
+  document.getElementById('canvas-container').appendChild(el)
+  return el
+}
+
+function closeBtn() {
+  return `<span class="ci-close" style="cursor:pointer;color:#555;font-size:17px;line-height:1;padding:2px 0 0 8px">×</span>`
+}
+
+function place(clientX, clientY) {
+  const rect = _canvas.getBoundingClientRect()
+  const x = clientX - rect.left + 18
+  const y = clientY - rect.top - 200
+  _popup.style.left = Math.min(x, rect.width - 260) + 'px'
+  _popup.style.top  = Math.max(y, 8) + 'px'
+}
+
+function render(html) {
+  _popup.innerHTML = html
+  _popup.style.display = 'block'
+  _popup.querySelector('.ci-close')?.addEventListener('click',
+    () => { _popup.style.display = 'none' })
+}
+
+function fmtPop(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + ' mrd'
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + ' mill'
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + ' 000'
+  return String(n)
+}
+
+function fmtArea(n) {
+  if (!n) return '–'
+  return n.toLocaleString('no-NO') + ' km²'
+}
+
+function sphereHit(e) {
+  const rect = _canvas.getBoundingClientRect()
+  const ndc = new THREE.Vector2(
+    ((e.clientX - rect.left) / rect.width)  *  2 - 1,
+    ((e.clientY - rect.top)  / rect.height) * -2 + 1,
+  )
+  const ray = new THREE.Raycaster()
+  ray.setFromCamera(ndc, _camera)
+  const hit = new THREE.Vector3()
+  return ray.ray.intersectSphere(new THREE.Sphere(new THREE.Vector3(), 101), hit)
+    ? hit : null
+}
+
+function vec3ToLatLon(v) {
+  const n = v.clone().normalize()
+  const lat = Math.asin(Math.max(-1, Math.min(1, n.y))) * 180 / Math.PI
+  let lon = Math.atan2(n.z, -n.x) * 180 / Math.PI - 180
+  if (lon < -180) lon += 360
+  if (lon >  180) lon -= 360
+  return [lat, lon]
+}
+
+async function fetchCountryInfo(lat, lon, clientX, clientY) {
+  place(clientX, clientY)
+  render(`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <span style="color:#777;font-size:11px">${lat.toFixed(2)}°, ${lon.toFixed(2)}°</span>
+      ${closeBtn()}
+    </div>
+    <div style="color:#555;margin-top:6px">Søker…</div>
+  `)
+
+  try {
+    const geo = await fetch(
+      `${GEOCODE_URL}?latitude=${lat.toFixed(5)}&longitude=${lon.toFixed(5)}&localityLanguage=en`
+    ).then(r => r.json())
+
+    if (!geo.countryCode) {
+      render(`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <span style="font-size:22px">🌊</span>
+          ${closeBtn()}
+        </div>
+        <div style="font-weight:600;margin:4px 0 2px">Åpent hav</div>
+        <div style="color:#555;font-size:11px">${lat.toFixed(3)}°, ${lon.toFixed(3)}°</div>
+      `)
+      return
+    }
+
+    const [country] = await fetch(`${COUNTRIES_URL}/${geo.countryCode}`).then(r => r.json())
+
+    const flag     = country.flag ?? country.flags?.emoji ?? ''
+    const name     = country.translations?.nor?.common ?? country.name?.common ?? geo.countryName
+    const capital  = (country.capital ?? [])[0] ?? '–'
+    const pop      = fmtPop(country.population ?? 0)
+    const area     = fmtArea(country.area)
+    const langs    = Object.values(country.languages ?? {}).slice(0, 2).join(', ') || '–'
+    const currencies = Object.values(country.currencies ?? {})
+    const currency = currencies.length
+      ? `${currencies[0].name} (${currencies[0].symbol ?? Object.keys(country.currencies)[0]})`
+      : '–'
+
+    render(`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <span style="font-size:2em;line-height:1">${flag}</span>
+        ${closeBtn()}
+      </div>
+      <div style="font-size:1.1em;font-weight:600;margin:6px 0 2px">${name}</div>
+      <div style="color:#888;font-size:11px;margin-bottom:8px">🏛 ${capital}</div>
+      <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:8px">
+        <div>👥 ${pop}</div>
+        <div>📐 ${area}</div>
+        <div>💬 ${langs}</div>
+        <div>💰 ${currency}</div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:#444;text-align:right">restcountries.com</div>
+    `)
+  } catch (err) {
+    render(`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <span style="color:#e66;font-size:12px">Kunne ikke hente data</span>
+        ${closeBtn()}
+      </div>
+    `)
+  }
+}
+
+function onPointerDown(e) {
+  if (e.button !== 0) return
+  _downPos = { x: e.clientX, y: e.clientY }
+}
+
+function onPointerUp(e) {
+  if (!_enabled || e.button !== 0 || !_downPos) return
+  const dx = e.clientX - _downPos.x
+  const dy = e.clientY - _downPos.y
+  _downPos = null
+  if (Math.hypot(dx, dy) > 6) return
+
+  if (_popup.style.display !== 'none') { _popup.style.display = 'none'; return }
+
+  const hit = sphereHit(e)
+  if (!hit) return
+  const [lat, lon] = vec3ToLatLon(hit)
+  fetchCountryInfo(lat, lon, e.clientX, e.clientY)
+}
+
+export function initCountryInfo(camera, canvas) {
+  _camera = camera
+  _canvas = canvas
+  _popup  = createPopup()
+  canvas.addEventListener('pointerdown', onPointerDown)
+  canvas.addEventListener('pointerup',   onPointerUp)
+}
+
+export function setCountryInfoEnabled(enabled) {
+  _enabled = enabled
+  if (!enabled && _popup) _popup.style.display = 'none'
+}

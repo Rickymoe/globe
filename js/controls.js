@@ -7,21 +7,22 @@ function makeToggle(id, onChange) {
   return el
 }
 
-export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEquator, onCapitals, onSolarSystem, onSun, onCityLights, onAurora, onWeatherClick, onEarthquakes, onIss, onTectonic, onReset }) {
-  const dragToggle        = makeToggle('drag-toggle',        onDragMode)
-  const labelsToggle      = makeToggle('labels-toggle',      onLabels)
-  const bordersToggle     = makeToggle('borders-toggle',     onBorders)
-  const transparentToggle = makeToggle('transparent-toggle', onOpacity)
-  const equatorToggle     = makeToggle('equator-toggle',     onEquator)
-  const capitalsToggle    = makeToggle('capitals-toggle',    onCapitals)
-  const solarToggle       = makeToggle('solar-toggle',       onSolarSystem)
-  const sunToggle         = makeToggle('sun-toggle',         onSun)
-  const cityLightsToggle  = makeToggle('citylights-toggle',  onCityLights)
-  const auroraToggle      = makeToggle('aurora-toggle',      onAurora)
-  const weatherToggle     = makeToggle('weather-toggle',     onWeatherClick)
-  const earthquakesToggle = makeToggle('earthquakes-toggle', onEarthquakes)
-  const issToggle         = makeToggle('iss-toggle',         onIss)
-  const tectonicToggle    = makeToggle('tectonic-toggle',    onTectonic)
+export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEquator, onCapitals, onSolarSystem, onSun, onCityLights, onAurora, onWeatherClick, onEarthquakes, onIss, onTectonic, onCountryInfo, onReset }) {
+  const dragToggle          = makeToggle('drag-toggle',          onDragMode)
+  const labelsToggle        = makeToggle('labels-toggle',        onLabels)
+  const bordersToggle       = makeToggle('borders-toggle',       onBorders)
+  const transparentToggle   = makeToggle('transparent-toggle',   onOpacity)
+  const equatorToggle       = makeToggle('equator-toggle',       onEquator)
+  const capitalsToggle      = makeToggle('capitals-toggle',      onCapitals)
+  const solarToggle         = makeToggle('solar-toggle',         onSolarSystem)
+  const sunToggle           = makeToggle('sun-toggle',           onSun)
+  const cityLightsToggle    = makeToggle('citylights-toggle',    onCityLights)
+  const auroraToggle        = makeToggle('aurora-toggle',        onAurora)
+  const weatherToggle       = makeToggle('weather-toggle',       onWeatherClick)
+  const earthquakesToggle   = makeToggle('earthquakes-toggle',   onEarthquakes)
+  const issToggle           = makeToggle('iss-toggle',           onIss)
+  const tectonicToggle      = makeToggle('tectonic-toggle',      onTectonic)
+  const countryInfoToggle   = makeToggle('countryinfo-toggle',   onCountryInfo)
 
   document.getElementById('compass')?.addEventListener('click', onReset)
 
@@ -39,4 +40,5 @@ export function initControls({ onOpacity, onBorders, onLabels, onDragMode, onEqu
   onEarthquakes(earthquakesToggle.classList.contains('active'))
   onIss(issToggle.classList.contains('active'))
   onTectonic(tectonicToggle.classList.contains('active'))
+  onCountryInfo(countryInfoToggle.classList.contains('active'))
 }

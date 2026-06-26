@@ -15,6 +15,7 @@ import { initDragger, setDragMode } from './dragger.js'
 import { initLatLines, setEquatorVisible } from './latlines.js'
 import { initCapitals, setCapitalsVisible } from './capitals.js'
 import { initWeatherClick, setWeatherClickEnabled } from './yr-weather.js'
+import { initCountryInfo, setCountryInfoEnabled } from './countryinfo.js'
 import { initStars } from './stars.js'
 import { initSolarSystem, setSolarSystemVisible, updatePlanetScales } from './solar-system.js'
 
@@ -37,6 +38,7 @@ initBorders(scene)
   initLatLines(scene)
   initCapitals(scene, getCamera(), getCanvas())
   initWeatherClick(getCamera(), getCanvas())
+  initCountryInfo(getCamera(), getCanvas())
   initSolarSystem(scene)
 
   const needle = document.getElementById('compass-needle')
@@ -56,6 +58,7 @@ initBorders(scene)
     onEarthquakes: setEarthquakesVisible,
     onIss: setIssVisible,
     onTectonic: setTectonicVisible,
+    onCountryInfo: setCountryInfoEnabled,
     onReset: resetCamera,
   })
 
