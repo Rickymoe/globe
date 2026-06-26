@@ -53,7 +53,7 @@ gh api repos/<repo>/contents/docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md
 gh issue create --repo <repo> \
   --title "<konkret oppgave>" \
   --label "@claude-build" \
-  --body "Spec: docs/superpowers/specs/<fil>\n\n<oppgavebeskrivelse>\n\nFiler: <relevante filer>"
+  --body $'Spec: docs/superpowers/specs/<fil>\n\n<oppgavebeskrivelse>\n\nFiler: <relevante filer>'
 ```
 
 ### 4. Kommenter og rydd
