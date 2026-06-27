@@ -58,6 +58,7 @@ attribute float aMagLon;
 attribute float aPhase;
 attribute float aSpeed;
 uniform float uTime;
+varying float vFade;
 
 void main() {
   float t = mod(aPhase + uTime * aSpeed, 1.0);
@@ -74,16 +75,22 @@ void main() {
   float xr = x * cos(tilt) - y * sin(tilt);
   float yr = x * sin(tilt) + y * cos(tilt);
 
+  // Fade ut partikler som er inni eller nær globeoverflaten (r=100)
+  float worldR = length(vec3(xr, yr, z));
+  vFade = smoothstep(95.0, 108.0, worldR);
+
   gl_Position = projectionMatrix * modelViewMatrix * vec4(xr, yr, z, 1.0);
   gl_PointSize = 3.0;
 }
 `
 
 const fragmentShader = `
+varying float vFade;
 void main() {
+  if (vFade < 0.01) discard;
   vec2 uv = gl_PointCoord - 0.5;
   if (length(uv) > 0.5) discard;
-  float alpha = smoothstep(0.5, 0.1, length(uv)) * 0.85;
+  float alpha = smoothstep(0.5, 0.1, length(uv)) * 0.85 * vFade;
   gl_FragColor = vec4(0.45, 0.75, 1.0, alpha);
 }
 `
