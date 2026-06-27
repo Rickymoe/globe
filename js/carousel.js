@@ -41,39 +41,32 @@ export function initCarousel() {
       applyOffset(_offset + (e.deltaY > 0 ? 1 : -1))
     }, { passive: false })
 
-  // Touch swipe — fungerer selv om fingeren starter på en toggle
+  // Touch swipe — touch events for å unngå konflikt med toggle-klikk
   const vp = document.getElementById('carousel-viewport')
-  let _startY = null
-  let _startOffset = null
-  let _moved = false
+  let _touchStartY = null
+  let _touchStartOffset = null
 
-  vp.addEventListener('pointerdown', e => {
-    _startY = e.clientY
-    _startOffset = _offset
-    _moved = false
-    vp.setPointerCapture(e.pointerId)
-  })
+  vp.addEventListener('touchstart', e => {
+    _touchStartY = e.touches[0].clientY
+    _touchStartOffset = _offset
+  }, { passive: true })
 
-  vp.addEventListener('pointermove', e => {
-    if (_startY === null) return
-    if (Math.abs(e.clientY - _startY) > 8) _moved = true
-  })
+  vp.addEventListener('touchmove', e => {
+    e.preventDefault()
+  }, { passive: false })
 
-  vp.addEventListener('pointerup', e => {
-    if (_startY === null) return
-    if (_moved) {
-      const steps = Math.round((_startY - e.clientY) / getPillH())
-      applyOffset(_startOffset + steps)
+  vp.addEventListener('touchend', e => {
+    if (_touchStartY === null) return
+    const dy = _touchStartY - e.changedTouches[0].clientY
+    const steps = Math.round(dy / getPillH())
+    if (Math.abs(dy) > 8 && steps !== 0) {
+      applyOffset(_touchStartOffset + steps)
+      e.preventDefault()
     }
-    _startY = null
-  })
+    _touchStartY = null
+  }, { passive: false })
 
-  vp.addEventListener('pointercancel', () => { _startY = null; _moved = false })
-
-  // Hindre at en swipe-bevegelse også aktiverer en toggle
-  vp.addEventListener('click', e => {
-    if (_moved) { e.stopPropagation(); _moved = false }
-  }, true)
+  vp.addEventListener('touchcancel', () => { _touchStartY = null })
 
   window.addEventListener('resize', () => {
     _pillH = null
