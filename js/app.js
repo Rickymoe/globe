@@ -22,6 +22,7 @@ import { initCarousel } from './carousel.js'
 import { initCenterEye, updateCenterEye } from './center-eye.js'
 import { initStars } from './stars.js'
 import { initSolarSystem, setSolarSystemVisible, updatePlanetScales } from './solar-system.js'
+import { initPlanetCompare, showPlanetPanel, exitPlanetCompare } from './planet-compare.js'
 
 function main() {
   const container = document.getElementById('canvas-container')
@@ -47,6 +48,7 @@ initBorders(scene)
   initCountryInfo(getCamera(), getCanvas())
   initCenterEye(getCamera(), getControls())
   initSolarSystem(scene)
+  initPlanetCompare(scene, getCamera(), getControls())
 
   const needle = document.getElementById('compass-needle')
 
@@ -58,7 +60,11 @@ initBorders(scene)
     onDragMode: setDragMode,
     onEquator: setEquatorVisible,
     onCapitals: v => { setCapitalsVisible(v); setApolloVisible(v) },
-    onSolarSystem: setSolarSystemVisible,
+    onSolarSystem: v => {
+      setSolarSystemVisible(v)
+      showPlanetPanel(v)
+      if (!v) exitPlanetCompare()
+    },
     onSun: setSunEnabled,
     onCityLights: setCityLightsVisible,
     onAurora: v => { setAuroraVisible(v); setMagnetFieldVisible(v) },
