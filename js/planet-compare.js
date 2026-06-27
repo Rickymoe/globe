@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { setSolarSystemVisible } from './solar-system.js'
+import { setAtmosphereVisible } from './atmosphere.js'
 
 const EARTH_R = 100
 
@@ -126,6 +127,7 @@ export function enterPlanetCompare(planetName) {
   if (!p) return
 
   setSolarSystemVisible(false)
+  setAtmosphereVisible(false)
 
   // Vis kun valgt planet, skjul resten
   for (const child of _compareGroup.children) {
@@ -170,6 +172,7 @@ export function exitPlanetCompare() {
 
   // Gjenopprett sol-system (🪐-toggle er fortsatt på)
   setSolarSystemVisible(true)
+  setAtmosphereVisible(true)
 
   // Gjenopprett kamera og controls
   _camera.position.copy(_savedCamPos)

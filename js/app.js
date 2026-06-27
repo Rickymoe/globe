@@ -61,9 +61,9 @@ initBorders(scene)
     onEquator: setEquatorVisible,
     onCapitals: v => { setCapitalsVisible(v); setApolloVisible(v) },
     onSolarSystem: v => {
+      if (!v) exitPlanetCompare()
       setSolarSystemVisible(v)
       showPlanetPanel(v)
-      if (!v) exitPlanetCompare()
     },
     onSun: setSunEnabled,
     onCityLights: setCityLightsVisible,

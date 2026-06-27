@@ -21,6 +21,8 @@ const fragmentShader = `
   }
 `
 
+let _mesh = null
+
 export function initAtmosphere(scene) {
   const geo = new THREE.SphereGeometry(115, 64, 64)
   const mat = new THREE.ShaderMaterial({
@@ -31,5 +33,10 @@ export function initAtmosphere(scene) {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   })
-  scene.add(new THREE.Mesh(geo, mat))
+  _mesh = new THREE.Mesh(geo, mat)
+  scene.add(_mesh)
+}
+
+export function setAtmosphereVisible(v) {
+  if (_mesh) _mesh.visible = v
 }
