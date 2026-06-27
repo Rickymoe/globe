@@ -41,6 +41,26 @@ export function initCarousel() {
       applyOffset(_offset + (e.deltaY > 0 ? 1 : -1))
     }, { passive: false })
 
+  // Touch swipe
+  const vp = document.getElementById('carousel-viewport')
+  let _dragY = null
+  let _dragOffset = null
+
+  vp.addEventListener('pointerdown', e => {
+    _dragY = e.clientY
+    _dragOffset = _offset
+    vp.setPointerCapture(e.pointerId)
+  })
+
+  vp.addEventListener('pointerup', e => {
+    if (_dragY === null) return
+    const steps = Math.round((_dragY - e.clientY) / getPillH())
+    if (steps !== 0) applyOffset(_dragOffset + steps)
+    _dragY = null
+  })
+
+  vp.addEventListener('pointercancel', () => { _dragY = null })
+
   window.addEventListener('resize', () => {
     _pillH = null
     applyOffset(_offset)
