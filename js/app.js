@@ -17,6 +17,7 @@ import { initCapitals, setCapitalsVisible } from './capitals.js'
 import { initWeatherClick, setWeatherClickEnabled } from './yr-weather.js'
 import { initCountryInfo, setCountryInfoEnabled } from './countryinfo.js'
 import { initCarousel } from './carousel.js'
+import { initCenterEye, updateCenterEye } from './center-eye.js'
 import { initStars } from './stars.js'
 import { initSolarSystem, setSolarSystemVisible, updatePlanetScales } from './solar-system.js'
 
@@ -40,6 +41,7 @@ initBorders(scene)
   initCapitals(scene, getCamera(), getCanvas())
   initWeatherClick(getCamera(), getCanvas())
   initCountryInfo(getCamera(), getCanvas())
+  initCenterEye(getCamera(), getControls())
   initSolarSystem(scene)
 
   const needle = document.getElementById('compass-needle')
@@ -70,6 +72,7 @@ initBorders(scene)
     updateEarthquakes(delta)
     updateCityLights(getSunDirection())
     updateAurora(delta)
+    updateCenterEye(delta)
   })
 }
 

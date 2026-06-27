@@ -47,6 +47,7 @@ export function initCarousel() {
   let _dragOffset = null
 
   vp.addEventListener('pointerdown', e => {
+    if (e.target.closest('.float-toggle')) return
     _dragY = e.clientY
     _dragOffset = _offset
     vp.setPointerCapture(e.pointerId)

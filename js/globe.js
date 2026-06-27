@@ -61,7 +61,7 @@ export function initScene(container) {
   _controls = new OrbitControls(_camera, _renderer.domElement)
   _controls.enableDamping = true
   _controls.dampingFactor = 0.05
-  _controls.minDistance = 120
+  _controls.minDistance = 0.5
   _controls.maxDistance = 80000
   _controls.enablePan = false
 
@@ -196,16 +196,28 @@ export function setMoonOpacity(transparent) {
   _moon.material.needsUpdate = true
 }
 
+let _insideGlobe = false
+
 export function setSunEnabled(enabled) {
   if (!_sunLight) return
   if (enabled) {
     const pos = calcSunPosition()
-    _sunLight.position.copy(pos)
-    _sunVisual.position.copy(pos)
+    _sunLight.position.copy(_insideGlobe ? pos.negate() : pos)
+    _sunVisual.position.copy(calcSunPosition())
   }
   _sunLight.visible  = enabled
   _sunVisual.visible = enabled
-  _ambient.intensity = enabled ? 0.08 : 1.0
+  _ambient.intensity = enabled ? (_insideGlobe ? 0.3 : 0.08) : 1.0
+}
+
+export function setInsideGlobe(inside) {
+  const sunOn = _sunLight?.visible ?? false
+  _insideGlobe = inside
+  if (sunOn) {
+    const pos = calcSunPosition()
+    _sunLight.position.copy(inside ? pos.negate() : pos)
+  }
+  _ambient.intensity = sunOn ? (inside ? 0.3 : 0.08) : 1.0
 }
 
 export function getCamera()      { return _camera }
@@ -244,7 +256,7 @@ export function startLoop(onFrame) {
       if (m !== _lastSunMinute) {
         _lastSunMinute = m
         const sunPos = calcSunPosition()
-        _sunLight.position.copy(sunPos)
+        _sunLight.position.copy(_insideGlobe ? sunPos.clone().negate() : sunPos)
         _sunVisual.position.copy(sunPos)
         _moon?.position.copy(calcMoonPosition())
       }

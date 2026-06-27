@@ -85,6 +85,29 @@ export function setSeaLevel(value) {
   _waterMesh.scale.setScalar(scale)
 }
 
+let _savedTerrainMat = null
+
+export function setCenterEyeMode(active) {
+  if (!_terrainMesh) return
+  if (active) {
+    _savedTerrainMat = _terrainMesh.material
+    _terrainMesh.material = new THREE.MeshStandardMaterial({
+      map: _savedTerrainMat.map,
+      roughness: 0.8,
+      metalness: 0.0,
+      side: THREE.BackSide,
+    })
+    if (_waterMesh) _waterMesh.visible = false
+  } else {
+    if (_savedTerrainMat) {
+      _terrainMesh.material.dispose()
+      _terrainMesh.material = _savedTerrainMat
+      _savedTerrainMat = null
+    }
+    if (_waterMesh) _waterMesh.visible = true
+  }
+}
+
 export function setOpacity(transparent) {
   if (!_terrainMesh) return
   if (transparent) {

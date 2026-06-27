@@ -10,6 +10,12 @@ export function setBordersVisible(visible) {
   if (_lines) _lines.visible = visible
 }
 
+export function setBordersCenterEye(active) {
+  if (!_lines) return
+  _lines.material.depthTest = !active
+  _lines.renderOrder = active ? 1 : 0
+}
+
 function latLonToVec3(lat, lon) {
   const phi   = (90 - lat) * Math.PI / 180
   const theta = (lon + 180) * Math.PI / 180
