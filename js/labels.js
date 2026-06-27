@@ -8,7 +8,7 @@ const NAMES = {
   4:'Afghanistan', 8:'Albania', 12:'Algeria', 24:'Angola', 32:'Argentina',
   36:'Australia', 40:'Austria', 50:'Bangladesh', 56:'Belgium', 64:'Bhutan',
   68:'Bolivia', 76:'Brazil', 100:'Bulgaria', 104:'Myanmar', 116:'Cambodia',
-  120:'Cameroon', 124:'Canada', 140:'C. Afr. Rep.', 152:'Chile', 156:'China',
+  120:'Cameroon', 124:'Canada', 140:'C. Afr. Rep.', 148:'Chad', 152:'Chile', 156:'China',
   170:'Colombia', 178:'Congo', 180:'DR Congo', 188:'Costa Rica', 192:'Cuba',
   203:'Czechia', 208:'Denmark', 218:'Ecuador', 818:'Egypt', 231:'Ethiopia',
   246:'Finland', 250:'France', 266:'Gabon', 276:'Germany', 288:'Ghana',
