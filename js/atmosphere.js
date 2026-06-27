@@ -1,42 +1,48 @@
 import * as THREE from 'three'
 
+const _uniforms = {
+  uSunDir: { value: new THREE.Vector3(1, 0, 0) },
+  uSunOn:  { value: 0.0 },
+}
+
 const vertexShader = `
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vWorldPos;
   void main() {
-    vNormal  = normalize(normalMatrix * normal);
+    vNormal    = normalize(normalMatrix * normal);
     vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-    vViewDir = normalize(-mvPos.xyz);
+    vViewDir   = normalize(-mvPos.xyz);
+    vWorldPos  = position;
     gl_Position = projectionMatrix * mvPos;
   }
 `
 
 const fragmentShader = `
+  uniform vec3  uSunDir;
+  uniform float uSunOn;
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vWorldPos;
   void main() {
-    float rim  = 1.0 - abs(dot(vNormal, vViewDir));
-    float glow = pow(rim, 3.5);
-    gl_FragColor = vec4(0.25, 0.55, 1.0, glow * 0.7);
-  }
-`
-
-const haloFragmentShader = `
-  varying vec3 vNormal;
-  varying vec3 vViewDir;
-  void main() {
-    float rim  = 1.0 - abs(dot(vNormal, vViewDir));
-    float halo = pow(rim, 3.0);
-    gl_FragColor = vec4(0.15, 0.45, 1.0, halo * 0.15);
+    float rim = 1.0 - abs(dot(vNormal, vViewDir));
+    float lit;
+    if (uSunOn > 0.5) {
+      float sunDot = dot(normalize(vWorldPos), uSunDir);
+      lit = smoothstep(-0.15, 0.45, sunDot);
+    } else {
+      lit = 0.35;
+    }
+    float glow = pow(rim, 7.0) * lit;
+    gl_FragColor = vec4(0.55, 0.80, 1.0, glow * 0.55);
   }
 `
 
 let _mesh = null
-let _halo = null
 
 export function initAtmosphere(scene) {
-  const geo = new THREE.SphereGeometry(115, 64, 64)
   const mat = new THREE.ShaderMaterial({
+    uniforms: _uniforms,
     vertexShader,
     fragmentShader,
     side: THREE.BackSide,
@@ -44,25 +50,18 @@ export function initAtmosphere(scene) {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   })
-  _mesh = new THREE.Mesh(geo, mat)
+  _mesh = new THREE.Mesh(new THREE.SphereGeometry(106, 64, 64), mat)
   scene.add(_mesh)
+}
 
-  // Ytre halo for myk fade mot verdensrommet
-  const haloGeo = new THREE.SphereGeometry(165, 64, 64)
-  const haloMat = new THREE.ShaderMaterial({
-    vertexShader,
-    haloFragmentShader,
-    fragmentShader: haloFragmentShader,
-    side: THREE.FrontSide,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-  })
-  _halo = new THREE.Mesh(haloGeo, haloMat)
-  scene.add(_halo)
+export function updateAtmosphere(sunPos) {
+  _uniforms.uSunDir.value.copy(sunPos).normalize()
+}
+
+export function setSunOnAtmosphere(on) {
+  _uniforms.uSunOn.value = on ? 1.0 : 0.0
 }
 
 export function setAtmosphereVisible(v) {
   if (_mesh) _mesh.visible = v
-  if (_halo) _halo.visible = v
 }

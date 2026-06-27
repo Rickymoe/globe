@@ -1,5 +1,5 @@
 import { initScene, startLoop, resetCamera, getCompassAngle, getCamera, getControls, getCanvas, setSunEnabled, setMoonTempEnabled, setMoonOpacity, setApolloVisible, getSunDirection } from './globe.js'
-import { initAtmosphere } from './atmosphere.js'
+import { initAtmosphere, updateAtmosphere, setSunOnAtmosphere } from './atmosphere.js'
 import { initTerrain, setSeaLevel, setOpacity } from './terrain.js'
 import { setGravity, setWindDirection } from './particles.js'
 import { initControls } from './controls.js'
@@ -65,7 +65,7 @@ initBorders(scene)
       setSolarSystemVisible(v)
       showPlanetPanel(v)
     },
-    onSun: setSunEnabled,
+    onSun: v => { setSunEnabled(v); setSunOnAtmosphere(v) },
     onCityLights: setCityLightsVisible,
     onAurora: v => { setAuroraVisible(v); setMagnetFieldVisible(v) },
     onWeatherClick: v => { setWeatherClickEnabled(v); setMoonTempEnabled(v) },
@@ -82,6 +82,7 @@ initBorders(scene)
     updatePlanetScales(getCamera())
     updateEarthquakes(delta)
     updateCityLights(getSunDirection())
+    updateAtmosphere(getSunDirection())
     updateAurora(delta)
     updateMagnetField(delta)
     updateCenterEye(delta)
