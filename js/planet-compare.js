@@ -5,14 +5,16 @@ import { setAtmosphereVisible } from './atmosphere.js'
 const EARTH_R = 100
 
 const PLANETS = [
-  { name: 'Merkur',  r:  38,   color: 0xaaaaaa },
-  { name: 'Venus',   r:  95,   color: 0xe8d08c },
-  { name: 'Mars',    r:  53,   color: 0xc1440e },
-  { name: 'Jupiter', r: 1120,  color: 0xc88b3a },
-  { name: 'Saturn',  r:  945,  color: 0xe8d87c, rings: true },
-  { name: 'Uranus',  r:  400,  color: 0x7de8e8 },
-  { name: 'Neptun',  r:  390,  color: 0x4060ff },
+  { name: 'Merkur',  r:  38,   color: 0xaaaaaa, texture: 'textures/planets/2k_mercury.jpg' },
+  { name: 'Venus',   r:  95,   color: 0xe8d08c, texture: 'textures/planets/2k_venus.jpg' },
+  { name: 'Mars',    r:  53,   color: 0xc1440e, texture: 'textures/planets/2k_mars.jpg' },
+  { name: 'Jupiter', r: 1120,  color: 0xc88b3a, texture: 'textures/planets/2k_jupiter.jpg' },
+  { name: 'Saturn',  r:  945,  color: 0xe8d87c, texture: 'textures/planets/2k_saturn.jpg', rings: true },
+  { name: 'Uranus',  r:  400,  color: 0x7de8e8, texture: 'textures/planets/2k_uranus.jpg' },
+  { name: 'Neptun',  r:  390,  color: 0x4060ff, texture: 'textures/planets/2k_neptune.jpg' },
 ]
+
+const _loader = new THREE.TextureLoader()
 
 let _camera, _controls
 let _compareGroup = null
@@ -32,6 +34,10 @@ export function initPlanetCompare(scene, camera, controls) {
   _compareGroup.visible = false
   scene.add(_compareGroup)
 
+  const light = new THREE.DirectionalLight(0xffffff, 1.5)
+  light.position.set(1, 0.5, 1).normalize()
+  _compareGroup.add(light)
+
   _buildPlanetMeshes()
   _buildPanel()
   _buildBackButton()
@@ -39,10 +45,11 @@ export function initPlanetCompare(scene, camera, controls) {
 
 function _buildPlanetMeshes() {
   for (const p of PLANETS) {
-    const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(p.r, 32, 32),
-      new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.8 })
-    )
+    const mat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.8 })
+    if (p.texture) {
+      _loader.load(p.texture, tex => { mat.map = tex; mat.needsUpdate = true })
+    }
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.r, 32, 32), mat)
     mesh.userData.planetName = p.name
     mesh.visible = false
     _compareGroup.add(mesh)
