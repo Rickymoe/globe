@@ -32,8 +32,12 @@ function buildLines(scene) {
       for (let i = 0; i < STEPS; i++) {
         const lam0 = ((i / STEPS) - 0.5) * Math.PI * (160 / 180)
         const lam1 = (((i + 1) / STEPS) - 0.5) * Math.PI * (160 / 180)
-        positions.push(...dipolePt(L, lam0, lon))
-        positions.push(...dipolePt(L, lam1, lon))
+        const p0 = dipolePt(L, lam0, lon)
+        const p1 = dipolePt(L, lam1, lon)
+        // Bare tegn segmenter som er utenfor globen (r >= 100)
+        if (Math.hypot(...p0) >= 100 && Math.hypot(...p1) >= 100) {
+          positions.push(...p0, ...p1)
+        }
       }
     }
   }
@@ -42,9 +46,9 @@ function buildLines(scene) {
   const mat = new THREE.LineBasicMaterial({
     color: 0x4488ff,
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.4,
     depthWrite: false,
-    depthTest: false,
+    depthTest: true,
   })
   _lines = new THREE.LineSegments(geo, mat)
   _lines.renderOrder = 3
