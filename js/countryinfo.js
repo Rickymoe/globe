@@ -1,13 +1,23 @@
 import * as THREE from 'three'
 
-const GEOCODE_URL = 'https://api.bigdatacloud.net/data/reverse-geocode-client'
-const COUNTRIES_URL = 'https://restcountries.com/v3.1/alpha'
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/reverse'
+const COUNTRIES_CDN = 'https://cdn.jsdelivr.net/npm/world-countries@5/countries.json'
 
 let _popup = null
 let _camera = null
 let _canvas = null
 let _enabled = false
 let _downPos = null
+
+// Loaded once on first click, then cached
+let _byIso2 = null
+async function getCountry(iso2) {
+  if (!_byIso2) {
+    const all = await fetch(COUNTRIES_CDN).then(r => r.json())
+    _byIso2 = Object.fromEntries(all.map(c => [c.cca2, c]))
+  }
+  return _byIso2[iso2] ?? null
+}
 
 function createPopup() {
   const el = document.createElement('div')
@@ -97,10 +107,11 @@ async function fetchCountryInfo(lat, lon, clientX, clientY) {
 
   try {
     const geo = await fetch(
-      `${GEOCODE_URL}?latitude=${lat.toFixed(5)}&longitude=${lon.toFixed(5)}&localityLanguage=en`
+      `${NOMINATIM_URL}?lat=${lat.toFixed(5)}&lon=${lon.toFixed(5)}&format=json&zoom=3&accept-language=en`
     ).then(r => r.json())
 
-    if (!geo.countryCode) {
+    const countryCode = geo.address?.country_code?.toUpperCase()
+    if (!countryCode) {
       render(`
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <span style="font-size:22px">🌊</span>
@@ -112,15 +123,15 @@ async function fetchCountryInfo(lat, lon, clientX, clientY) {
       return
     }
 
-    const [country] = await fetch(`${COUNTRIES_URL}/${geo.countryCode}`).then(r => r.json())
+    const country = await getCountry(countryCode)
 
-    const flag     = country.flag ?? country.flags?.emoji ?? ''
-    const name     = country.translations?.nor?.common ?? country.name?.common ?? geo.countryName
-    const capital  = (country.capital ?? [])[0] ?? '–'
-    const pop      = fmtPop(country.population ?? 0)
-    const area     = fmtArea(country.area)
-    const langs    = Object.values(country.languages ?? {}).slice(0, 2).join(', ') || '–'
-    const currencies = Object.values(country.currencies ?? {})
+    const flag     = country?.flag ?? ''
+    const name     = country?.translations?.nor?.common ?? country?.name?.common ?? geo.address?.country ?? countryCode
+    const capital  = (country?.capital ?? [])[0] ?? '–'
+    const pop      = fmtPop(country?.population ?? 0)
+    const area     = fmtArea(country?.area)
+    const langs    = Object.values(country?.languages ?? {}).slice(0, 2).join(', ') || '–'
+    const currencies = Object.values(country?.currencies ?? {})
     const currency = currencies.length
       ? `${currencies[0].name} (${currencies[0].symbol ?? Object.keys(country.currencies)[0]})`
       : '–'
@@ -133,19 +144,21 @@ async function fetchCountryInfo(lat, lon, clientX, clientY) {
       <div style="font-size:1.1em;font-weight:600;margin:6px 0 2px">${name}</div>
       <div style="color:#888;font-size:11px;margin-bottom:8px">🏛 ${capital}</div>
       <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:8px">
-        <div>👥 ${pop}</div>
+        ${country?.population ? `<div>👥 ${pop}</div>` : ''}
         <div>📐 ${area}</div>
         <div>💬 ${langs}</div>
         <div>💰 ${currency}</div>
       </div>
-      <div style="margin-top:8px;font-size:10px;color:#444;text-align:right">restcountries.com</div>
+      <div style="margin-top:8px;font-size:10px;color:#444;text-align:right">world-countries / OSM</div>
     `)
   } catch (err) {
+    console.error('[countryinfo] fetch error:', err)
     render(`
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <span style="color:#e66;font-size:12px">Kunne ikke hente data</span>
         ${closeBtn()}
       </div>
+      <div style="color:#555;font-size:10px;margin-top:4px">${err.message}</div>
     `)
   }
 }

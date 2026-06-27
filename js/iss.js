@@ -23,16 +23,18 @@ function updateIssPosition(lat, lon) {
   if (_glowDot) _glowDot.geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
 }
 
+const ISS_URL = 'https://api.wheretheiss.at/v1/satellites/25544'
+let _retryDelay = 10000
+
 async function fetchAndUpdate() {
   try {
-    const res  = await fetch('https://api.open-notify.org/iss-now.json')
-    const data = await res.json()
-    const lat  = parseFloat(data.iss_position.latitude)
-    const lon  = parseFloat(data.iss_position.longitude)
-    updateIssPosition(lat, lon)
+    const data = await fetch(ISS_URL).then(r => r.json())
+    updateIssPosition(data.latitude, data.longitude)
+    _retryDelay = 10000
   } catch {
-    // silently ignore fetch errors
+    _retryDelay = Math.min(_retryDelay * 2, 300000)
   }
+  setTimeout(fetchAndUpdate, _retryDelay)
 }
 
 export async function initIss(scene) {
@@ -62,8 +64,7 @@ export async function initIss(scene) {
   }))
   _group.add(_glowDot)
 
-  await fetchAndUpdate()
-  setInterval(fetchAndUpdate, 10000)
+  fetchAndUpdate()
 }
 
 export function setIssVisible(visible) {
