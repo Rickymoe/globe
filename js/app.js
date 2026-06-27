@@ -10,6 +10,7 @@ import { initIss, setIssVisible } from './iss.js'
 import { initTectonic, setTectonicVisible } from './tectonic.js'
 import { initCityLights, setCityLightsVisible, updateCityLights } from './citylights.js'
 import { initAurora, setAuroraVisible, updateAurora } from './aurora.js'
+import { initTimezones, setTimezonesVisible } from './timezones.js'
 import { initMagnetField, setMagnetFieldVisible, updateMagnetField } from './magnetfield.js'
 import { initLabels, setLabelsVisible } from './labels.js'
 import { initDragger, setDragMode } from './dragger.js'
@@ -37,6 +38,7 @@ initBorders(scene)
   initCityLights(scene)
   initAurora(scene)
   initMagnetField(scene)
+  initTimezones(scene)
   initLabels(scene)
   initDragger(scene, getCamera(), getControls(), getCanvas())
   initLatLines(scene)
@@ -65,6 +67,7 @@ initBorders(scene)
     onIss: setIssVisible,
     onTectonic: setTectonicVisible,
     onCountryInfo: setCountryInfoEnabled,
+    onTimezones: setTimezonesVisible,
     onReset: resetCamera,
   })
 
