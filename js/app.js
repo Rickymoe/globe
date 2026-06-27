@@ -10,6 +10,7 @@ import { initIss, setIssVisible } from './iss.js'
 import { initTectonic, setTectonicVisible } from './tectonic.js'
 import { initCityLights, setCityLightsVisible, updateCityLights } from './citylights.js'
 import { initAurora, setAuroraVisible, updateAurora } from './aurora.js'
+import { initMagnetField, setMagnetFieldVisible, updateMagnetField } from './magnetfield.js'
 import { initLabels, setLabelsVisible } from './labels.js'
 import { initDragger, setDragMode } from './dragger.js'
 import { initLatLines, setEquatorVisible } from './latlines.js'
@@ -35,6 +36,7 @@ initBorders(scene)
   initTectonic(scene)
   initCityLights(scene)
   initAurora(scene)
+  initMagnetField(scene)
   initLabels(scene)
   initDragger(scene, getCamera(), getControls(), getCanvas())
   initLatLines(scene)
@@ -57,7 +59,7 @@ initBorders(scene)
     onSolarSystem: setSolarSystemVisible,
     onSun: setSunEnabled,
     onCityLights: setCityLightsVisible,
-    onAurora: setAuroraVisible,
+    onAurora: v => { setAuroraVisible(v); setMagnetFieldVisible(v) },
     onWeatherClick: v => { setWeatherClickEnabled(v); setMoonTempEnabled(v) },
     onEarthquakes: setEarthquakesVisible,
     onIss: setIssVisible,
@@ -72,6 +74,7 @@ initBorders(scene)
     updateEarthquakes(delta)
     updateCityLights(getSunDirection())
     updateAurora(delta)
+    updateMagnetField(delta)
     updateCenterEye(delta)
   })
 }
