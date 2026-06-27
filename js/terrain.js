@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 const BASE = 'https://threejs.org/examples/textures/planets/'
 
-let _terrainMesh, _backMesh, _waterMesh
+let _terrainMesh, _backMesh, _waterMesh, _atmSprite
 
 export function initTerrain(scene) {
   const loader = new THREE.TextureLoader()
@@ -56,14 +56,15 @@ export function initTerrain(scene) {
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, size, size)
 
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    _atmSprite = new THREE.Sprite(new THREE.SpriteMaterial({
       map: new THREE.CanvasTexture(canvas),
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
+      opacity: 0,
     }))
-    sprite.scale.set(R_ATM * 2, R_ATM * 2, 1)
-    scene.add(sprite)
+    _atmSprite.scale.set(R_ATM * 2, R_ATM * 2, 1)
+    scene.add(_atmSprite)
   }
 
   // Water sphere
@@ -106,6 +107,13 @@ export function setCenterEyeMode(active) {
     }
     if (_waterMesh) _waterMesh.visible = true
   }
+}
+
+export function updateAtmGlow(camDist) {
+  if (!_atmSprite) return
+  const fade = Math.max(0, 1 - (camDist - 120) / 80)
+  _atmSprite.material.opacity = fade
+  _atmSprite.visible = fade > 0
 }
 
 export function setOpacity(transparent) {

@@ -1,8 +1,9 @@
 import * as THREE from 'three'
 
 const _uniforms = {
-  uSunDir: { value: new THREE.Vector3(1, 0, 0) },
-  uSunOn:  { value: 0.0 },
+  uSunDir:   { value: new THREE.Vector3(1, 0, 0) },
+  uSunOn:    { value: 0.0 },
+  uDistFade: { value: 0.0 },
 }
 
 const vertexShader = `
@@ -21,6 +22,7 @@ const vertexShader = `
 const fragmentShader = `
   uniform vec3  uSunDir;
   uniform float uSunOn;
+  uniform float uDistFade;
   varying vec3 vNormal;
   varying vec3 vViewDir;
   varying vec3 vWorldPos;
@@ -33,12 +35,13 @@ const fragmentShader = `
     } else {
       lit = 0.35;
     }
-    float glow = pow(rim, 7.0) * lit;
+    float glow = pow(rim, 7.0) * lit * uDistFade;
     gl_FragColor = vec4(0.55, 0.80, 1.0, glow * 0.55);
   }
 `
 
 let _mesh = null
+let _forceHidden = false
 
 export function initAtmosphere(scene) {
   const mat = new THREE.ShaderMaterial({
@@ -54,8 +57,11 @@ export function initAtmosphere(scene) {
   scene.add(_mesh)
 }
 
-export function updateAtmosphere(sunPos) {
+export function updateAtmosphere(sunPos, camDist) {
   _uniforms.uSunDir.value.copy(sunPos).normalize()
+  const fade = Math.max(0, 1 - (camDist - 120) / 80)
+  _uniforms.uDistFade.value = fade
+  if (_mesh && !_forceHidden) _mesh.visible = fade > 0
 }
 
 export function setSunOnAtmosphere(on) {
@@ -63,5 +69,6 @@ export function setSunOnAtmosphere(on) {
 }
 
 export function setAtmosphereVisible(v) {
+  _forceHidden = !v
   if (_mesh) _mesh.visible = v
 }

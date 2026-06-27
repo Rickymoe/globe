@@ -1,6 +1,6 @@
 import { initScene, startLoop, resetCamera, getCompassAngle, getCamera, getControls, getCanvas, setSunEnabled, setMoonTempEnabled, setMoonOpacity, setApolloVisible, getSunDirection } from './globe.js'
 import { initAtmosphere, updateAtmosphere, setSunOnAtmosphere } from './atmosphere.js'
-import { initTerrain, setSeaLevel, setOpacity } from './terrain.js'
+import { initTerrain, setSeaLevel, setOpacity, updateAtmGlow } from './terrain.js'
 import { setGravity, setWindDirection } from './particles.js'
 import { initControls } from './controls.js'
 import { initBorders, setBordersVisible } from './borders.js'
@@ -82,7 +82,9 @@ initBorders(scene)
     updatePlanetScales(getCamera())
     updateEarthquakes(delta)
     updateCityLights(getSunDirection())
-    updateAtmosphere(getSunDirection())
+    const camDist = getCamera().position.length()
+    updateAtmosphere(getSunDirection(), camDist)
+    updateAtmGlow(camDist)
     updateAurora(delta)
     updateMagnetField(delta)
     updateCenterEye(delta)
