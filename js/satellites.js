@@ -12,9 +12,11 @@ const R_EARTH   = 6371   // km
 const R_GLOBE   = 100    // Three.js units
 const UPDATE_S  = 30     // recompute positions every 30 s
 
-let _group    = null
-let _points   = null
-let _satData  = []
+let _group        = null
+let _pointsOther  = null   // cyan/green/gold — size 3
+let _pointsStarl  = null   // white Starlinks  — size 6
+let _satOther     = []
+let _satStarl     = []
 let _hover    = []       // [{x,y,name,alt}] in screen space
 let _tooltip  = null
 let _camera   = null
@@ -125,20 +127,41 @@ function altColor(nRevDay, name) {
   return [1.0, 0.85, 0.0]                                   // GEO — gold
 }
 
-function recompute() {
-  if (!_satData.length || !_points) return
+function _recomputeGroup(data, points) {
+  if (!data.length || !points) return
   const now = new Date()
-  const pos = _points.geometry.attributes.position
-  for (let i = 0; i < _satData.length; i++) {
+  const pos = points.geometry.attributes.position
+  for (let i = 0; i < data.length; i++) {
     try {
-      const { lat, lon, alt } = propagate(_satData[i], now)
-      _satData[i].lastAlt = alt
+      const { lat, lon, alt } = propagate(data[i], now)
+      data[i].lastAlt = alt
       const v = toVec3(lat, lon, alt)
       pos.setXYZ(i, v.x, v.y, v.z)
     } catch {}
   }
   pos.needsUpdate = true
+}
+
+function recompute() {
+  _recomputeGroup(_satOther, _pointsOther)
+  _recomputeGroup(_satStarl, _pointsStarl)
   _projectToScreen()
+}
+
+function _projectGroup(data, points, rect, camDir) {
+  if (!data.length || !points) return
+  const pos = points.geometry.attributes.position
+  for (let i = 0; i < data.length; i++) {
+    const v = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i))
+    if (v.clone().normalize().dot(camDir) < 0.1) continue
+    const sc = v.clone().project(_camera)
+    _hover.push({
+      x: ( sc.x + 1) / 2 * rect.width,
+      y: (-sc.y + 1) / 2 * rect.height,
+      name: data[i].name,
+      alt:  data[i].lastAlt,
+    })
+  }
 }
 
 function _projectToScreen() {
@@ -146,18 +169,8 @@ function _projectToScreen() {
   _hover = []
   const rect   = _canvas.getBoundingClientRect()
   const camDir = _camera.position.clone().normalize()
-  const pos    = _points.geometry.attributes.position
-  for (let i = 0; i < _satData.length; i++) {
-    const v = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i))
-    if (v.clone().normalize().dot(camDir) < 0.1) continue  // behind globe
-    const sc = v.clone().project(_camera)
-    _hover.push({
-      x: ( sc.x + 1) / 2 * rect.width,
-      y: (-sc.y + 1) / 2 * rect.height,
-      name: _satData[i].name,
-      alt:  _satData[i].lastAlt,
-    })
-  }
+  _projectGroup(_satOther, _pointsOther, rect, camDir)
+  _projectGroup(_satStarl, _pointsStarl, rect, camDir)
 }
 
 // ── Tooltip ───────────────────────────────────────────────────────────────────
@@ -213,28 +226,31 @@ export async function initSatellites(scene, camera, canvas) {
   )
   const all = results.flatMap(r => r.status === 'fulfilled' ? parseTLE(r.value) : [])
   if (!all.length) { console.warn('[satellites] all TLE fetches failed'); return }
-  _satData = all
-  if (!_satData.length) return
+  _satOther = all.filter(s => !s.name.startsWith('STARLINK'))
+  _satStarl = all.filter(s =>  s.name.startsWith('STARLINK'))
 
-  const n    = _satData.length
-  const pos  = new Float32Array(n * 3)
-  const col  = new Float32Array(n * 3)
-
-  for (let i = 0; i < n; i++) {
-    const [r, g, b] = altColor(_satData[i].nRevDay, _satData[i].name)
-    col[i*3] = r; col[i*3+1] = g; col[i*3+2] = b
-    pos[i*3+1] = R_GLOBE + 6
+  function makePoints(data, size) {
+    const n   = data.length
+    const pos = new Float32Array(n * 3)
+    const col = new Float32Array(n * 3)
+    for (let i = 0; i < n; i++) {
+      const [r, g, b] = altColor(data[i].nRevDay, data[i].name)
+      col[i*3] = r; col[i*3+1] = g; col[i*3+2] = b
+      pos[i*3+1] = R_GLOBE + 6
+    }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+    geo.setAttribute('color',    new THREE.Float32BufferAttribute(col, 3))
+    return new THREE.Points(geo, new THREE.PointsMaterial({
+      size, sizeAttenuation: true, vertexColors: true,
+      transparent: true, opacity: 0.9, depthTest: false,
+    }))
   }
 
-  const geo = new THREE.BufferGeometry()
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
-  geo.setAttribute('color',    new THREE.Float32BufferAttribute(col, 3))
-
-  _points = new THREE.Points(geo, new THREE.PointsMaterial({
-    size: 3, sizeAttenuation: true, vertexColors: true,
-    transparent: true, opacity: 0.9, depthTest: false,
-  }))
-  _group.add(_points)
+  _pointsOther = makePoints(_satOther, 3)
+  _pointsStarl = makePoints(_satStarl, 6)
+  _group.add(_pointsOther)
+  _group.add(_pointsStarl)
 
   recompute()
 }
