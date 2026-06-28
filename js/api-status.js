@@ -1,20 +1,19 @@
-// Discrete API health indicator: small dot bottom-left, hover → per-API list
+// API health indicator — pill top-left, hover expands per-API list
 
 const today = () => new Date().toISOString().slice(0, 10)
 
 const APIS = [
-  { name: 'USGS Earthquakes',   url: () => 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson' },
-  { name: 'NASA EONET',         url: () => 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=1' },
-  { name: 'NASA DONKI',         url: () => `https://api.nasa.gov/DONKI/FLR?startDate=${today()}&endDate=${today()}&api_key=DEMO_KEY` },
-  { name: 'NOAA Space Weather', url: () => 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json' },
-  { name: 'ISS Position',       url: () => 'https://api.wheretheiss.at/v1/satellites/25544' },
-  { name: 'MET Norway',         url: () => 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=59.9&lon=10.7' },
-  { name: 'OSM Nominatim',      url: () => 'https://nominatim.openstreetmap.org/reverse?lat=59.9&lon=10.7&format=json&zoom=3' },
-  { name: 'jsDelivr CDN',       url: () => 'https://cdn.jsdelivr.net/npm/world-countries@5/countries.json' },
-  { name: 'GitHub Raw',         url: () => 'https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json' },
+  { name: 'USGS Earthquakes',   hint: 'Real-time earthquake data — magnitudes, locations, depth',                          url: () => 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson' },
+  { name: 'NASA EONET',         hint: 'Natural disaster events — wildfires, storms, floods',                               url: () => 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=1' },
+  { name: 'NASA DONKI',         hint: 'Solar flare activity — drives aurora intensity (Kp index)',                         url: () => `https://api.nasa.gov/DONKI/FLR?startDate=${today()}&endDate=${today()}&api_key=DEMO_KEY` },
+  { name: 'NOAA Space Weather', hint: 'Planetary K-index — geomagnetic storm level for aurora oval',                      url: () => 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json' },
+  { name: 'ISS Position',       hint: 'International Space Station real-time lat/lon/altitude',                           url: () => 'https://api.wheretheiss.at/v1/satellites/25544' },
+  { name: 'MET Norway',         hint: 'Weather forecast — click any point on the globe for local weather',                url: () => 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=59.9&lon=10.7' },
+  { name: 'OSM Nominatim',      hint: 'Reverse geocoding — country name and region when clicking the globe',              url: () => 'https://nominatim.openstreetmap.org/reverse?lat=59.9&lon=10.7&format=json&zoom=3' },
+  { name: 'jsDelivr CDN',       hint: 'Country data (flags, population, capital) and TopoJSON world atlas',               url: () => 'https://cdn.jsdelivr.net/npm/world-countries@5/countries.json' },
+  { name: 'GitHub Raw',         hint: 'Tectonic plate boundary data (Fraxen/tectonicplates)',                             url: () => 'https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json' },
 ]
 
-// Fetch only headers, abort body download immediately
 async function ping(url) {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), 8000)
@@ -29,42 +28,47 @@ async function ping(url) {
   }
 }
 
-let _dot   = null
+let _pill  = null
 let _panel = null
-let _statuses = APIS.map(() => null)  // null = pending, true = ok, false = fail
+let _statuses = APIS.map(() => null)
 
-function dotColor() {
+function pillColor() {
   const known = _statuses.filter(s => s !== null)
-  if (!known.length)           return '#555'
-  if (known.every(s => s))     return '#22c55e'
-  if (known.some(s => s))      return '#eab308'
+  if (!known.length)        return '#555'
+  if (known.every(s => s))  return '#22c55e'
+  if (known.some(s => s))   return '#eab308'
   return '#ef4444'
 }
 
+function pillLabel() {
+  const ok   = _statuses.filter(s => s === true).length
+  const fail = _statuses.filter(s => s === false).length
+  const pending = _statuses.filter(s => s === null).length
+  if (pending === APIS.length) return 'Checking APIs…'
+  if (fail === 0)  return `${ok} / ${APIS.length} APIs`
+  return `${fail} API${fail > 1 ? 's' : ''} down`
+}
+
 function render() {
-  _dot.style.background = dotColor()
+  const col = pillColor()
+
+  _pill.innerHTML = `
+    <span style="width:7px;height:7px;border-radius:50%;background:${col};flex-shrink:0;display:inline-block;box-shadow:0 0 5px ${col}"></span>
+    <span style="font-size:11px;color:#ccc;font-family:system-ui,sans-serif">${pillLabel()}</span>
+  `
 
   const rows = APIS.map((api, i) => {
     const s = _statuses[i]
-    const color = s === null ? '#555' : s ? '#22c55e' : '#ef4444'
-    return `<div style="display:flex;align-items:center;gap:6px;padding:1px 0">
-      <span style="width:6px;height:6px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>
-      <span style="color:${s === false ? '#ef4444' : '#ccc'}">${api.name}</span>
+    const c = s === null ? '#555' : s ? '#22c55e' : '#ef4444'
+    return `<div title="${api.hint}" style="display:flex;align-items:center;gap:7px;padding:2px 0;cursor:default">
+      <span style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block;box-shadow:${s ? `0 0 4px ${c}` : 'none'}"></span>
+      <span style="color:${s === false ? '#ef4444' : '#ccc'};font-size:11px">${api.name}</span>
     </div>`
   }).join('')
 
-  const ok   = _statuses.filter(s => s === true).length
-  const fail = _statuses.filter(s => s === false).length
-  const summary = fail
-    ? `<div style="color:#ef4444;font-size:10px;margin-top:6px">${fail} unreachable</div>`
-    : ok === APIS.length
-      ? `<div style="color:#22c55e;font-size:10px;margin-top:6px">All ${ok} APIs OK</div>`
-      : `<div style="color:#555;font-size:10px;margin-top:6px">Checking…</div>`
-
   _panel.innerHTML = `
-    <div style="font-size:11px;font-family:system-ui,sans-serif;line-height:1.7">
-      ${rows}${summary}
-    </div>`
+    <div style="font-family:system-ui,sans-serif;line-height:1.8">${rows}</div>
+  `
 }
 
 async function refresh() {
@@ -77,31 +81,37 @@ async function refresh() {
 }
 
 export function initApiStatus() {
-  // Dot
-  _dot = document.createElement('div')
-  _dot.style.cssText = [
-    'position:fixed', 'bottom:5.6rem', 'left:1.15rem',
-    'width:8px', 'height:8px', 'border-radius:50%',
-    'background:#555', 'cursor:default', 'z-index:200',
-    'transition:background 0.4s',
+  _pill = document.createElement('div')
+  _pill.style.cssText = [
+    'position:fixed', 'top:1rem', 'left:1rem',
+    'display:flex', 'align-items:center', 'gap:7px',
+    'background:rgba(0,0,0,0.65)', 'border:1px solid rgba(255,255,255,0.14)',
+    'border-radius:999px', 'padding:5px 12px',
+    'backdrop-filter:blur(8px)', 'z-index:200',
+    'cursor:default', 'user-select:none',
+    'transition:border-color 0.2s',
   ].join(';')
 
-  // Hover panel
   _panel = document.createElement('div')
   _panel.style.cssText = [
-    'position:fixed', 'bottom:7rem', 'left:0.7rem',
+    'position:fixed', 'top:2.8rem', 'left:1rem',
     'background:rgba(8,8,8,0.88)', 'color:#ccc',
     'border:1px solid rgba(255,255,255,0.12)',
-    'border-radius:10px', 'padding:8px 11px',
-    'backdrop-filter:blur(6px)', 'z-index:201',
-    'display:none', 'pointer-events:none',
+    'border-radius:12px', 'padding:10px 14px',
+    'backdrop-filter:blur(8px)', 'z-index:201',
+    'display:none', 'pointer-events:auto',
     'white-space:nowrap',
   ].join(';')
 
-  _dot.addEventListener('mouseenter', () => { _panel.style.display = 'block' })
-  _dot.addEventListener('mouseleave', () => { _panel.style.display = 'none' })
+  const showPanel = () => { _panel.style.display = 'block'; _pill.style.borderColor = 'rgba(255,255,255,0.35)' }
+  const hidePanel = () => { _panel.style.display = 'none';  _pill.style.borderColor = 'rgba(255,255,255,0.14)' }
 
-  document.body.appendChild(_dot)
+  _pill.addEventListener('mouseenter',  showPanel)
+  _pill.addEventListener('mouseleave',  () => setTimeout(() => { if (!_panel.matches(':hover')) hidePanel() }, 50))
+  _panel.addEventListener('mouseenter', showPanel)
+  _panel.addEventListener('mouseleave', hidePanel)
+
+  document.body.appendChild(_pill)
   document.body.appendChild(_panel)
 
   refresh()
