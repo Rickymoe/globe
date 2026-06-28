@@ -179,7 +179,7 @@ async function _connect(apiKey) {
     _ws.send(JSON.stringify({
       APIKey: apiKey,
       BoundingBoxes: [[[-90, -180], [90, 180]]],
-      FilterMessageTypes: ['PositionReport'],
+      FilterMessageTypes: ['PositionReport', 'ShipStaticData'],
     }))
   }
 
@@ -191,16 +191,28 @@ async function _connect(apiKey) {
       const rep  = msg.Message?.PositionReport
       if (!rep || meta?.latitude == null) return
 
-      const mmsi = meta.MMSI
+      const mmsi     = meta.MMSI
       const existing = _vessels.get(mmsi) ?? {}
-      _vessels.set(mmsi, {
-        mmsi,
-        lat:      meta.latitude,
-        lon:      meta.longitude,
-        name:     meta.ShipName ?? existing.name,
-        shipType: existing.shipType ?? 0,
-        sog:      rep.Sog,
-      })
+
+      if (msg.MessageType === 'ShipStaticData') {
+        const s = msg.Message?.ShipStaticData
+        _vessels.set(mmsi, {
+          ...existing,
+          mmsi,
+          name:     s?.Name?.trim() || meta.ShipName?.trim() || existing.name,
+          shipType: s?.Type ?? existing.shipType ?? 0,
+        })
+      } else {
+        // PositionReport
+        _vessels.set(mmsi, {
+          ...existing,
+          mmsi,
+          lat:  meta.latitude,
+          lon:  meta.longitude,
+          name: meta.ShipName?.trim() || existing.name,
+          sog:  rep?.Sog,
+        })
+      }
       _dirty = true
     } catch { /* skip malformed */ }
   }
