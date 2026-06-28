@@ -112,7 +112,7 @@ function _buildPanel() {
 
 function _buildBackButton() {
   _backBtn = document.createElement('button')
-  _backBtn.textContent = '← Tilbake'
+  _backBtn.textContent = '← Back'
   _backBtn.style.cssText = [
     'position:fixed', 'top:1rem', 'left:1rem', 'z-index:101',
     'display:none', 'background:rgba(0,0,0,0.75)', 'color:white',

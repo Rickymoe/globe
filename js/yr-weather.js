@@ -81,7 +81,7 @@ async function fetchWeather(lat, lon, clientX, clientY) {
       <span style="color:#777;font-size:11px">${coordLabel(lat, lon)}</span>
       ${closeBtn()}
     </div>
-    <div style="color:#555;margin-top:6px">Henter…</div>
+    <div style="color:#555;margin-top:6px">Loading…</div>
   `)
 
   try {

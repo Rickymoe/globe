@@ -154,7 +154,7 @@ function _initMoonTooltip(container) {
     if (_apolloMarker) {
       const apolloHits = ray.intersectObject(_apolloMarker)
       if (apolloHits.length) {
-        tip.innerHTML = '🚀 <b>Apollo 11</b><br><span style="color:#aaa;font-size:11px">Mare Tranquillitatis · 20. juli 1969</span>'
+        tip.innerHTML = '🚀 <b>Apollo 11</b><br><span style="color:#aaa;font-size:11px">Mare Tranquillitatis · July 20, 1969</span>'
         tip.style.display = 'block'
         tip.style.left = (e.clientX - rect.left + 14) + 'px'
         tip.style.top  = (e.clientY - rect.top  - 36) + 'px'
@@ -171,7 +171,7 @@ function _initMoonTooltip(container) {
     const camDir = _camera.position.clone().sub(_moon.position).normalize()
     const lit    = (sunDir.dot(camDir) + 1) / 2   // 0–1
     const temp   = Math.round(-173 + lit * 300)    // −173 °C … +127 °C
-    const side   = lit > 0.55 ? 'Dagsiden' : lit < 0.45 ? 'Nattside' : 'Terminator'
+    const side   = lit > 0.55 ? 'Day side' : lit < 0.45 ? 'Night side' : 'Terminator'
     const emoji  = temp > 50 ? '🌡' : temp > 0 ? '🌡' : '🥶'
 
     tip.innerHTML = `${emoji} <b>${temp > 0 ? '+' : ''}${temp}°C</b> <span style="color:#777;font-size:11px">${side}</span>`

@@ -83,7 +83,7 @@ function onPointerMove(e) {
 
   if (bestEv) {
     _tooltip.innerHTML =
-      `<strong>${bestEv.icon} M ${bestEv.mag.toFixed(1)} – Jordskalv</strong><br>` +
+      `<strong>${bestEv.icon} M ${bestEv.mag.toFixed(1)} – Earthquake</strong><br>` +
       `<span style="opacity:0.75;font-size:11px">${bestEv.place} · ${bestEv.date}</span>`
     _tooltip.style.display = 'block'
     const tipW = _tooltip.offsetWidth
@@ -116,7 +116,7 @@ export async function initEarthquakes(scene, camera, canvas) {
   for (const feature of data.features) {
     const [lon, lat] = feature.geometry.coordinates
     const mag = feature.properties.mag ?? 2.5
-    const place = feature.properties.place ?? 'Ukjent'
+    const place = feature.properties.place ?? 'Unknown'
     const date = feature.properties.time
       ? new Date(feature.properties.time).toISOString().slice(0, 10)
       : ''

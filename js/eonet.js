@@ -117,7 +117,7 @@ export async function initEonet(scene, camera, canvas) {
     const [lon, lat] = latest.coordinates
 
     const catId = event.categories?.[0]?.id ?? '_default'
-    const catTitle = event.categories?.[0]?.title ?? 'Ukjent'
+    const catTitle = event.categories?.[0]?.title ?? 'Unknown'
     const style = CATEGORY_STYLE[catId] ?? CATEGORY_STYLE._default
 
     const rawDate = latest.date?.slice(0, 10) ?? ''

@@ -70,7 +70,7 @@ function fmtPop(n) {
 
 function fmtArea(n) {
   if (!n) return '–'
-  return n.toLocaleString('no-NO') + ' km²'
+  return n.toLocaleString('en-US') + ' km²'
 }
 
 function sphereHit(e) {
@@ -102,7 +102,7 @@ async function fetchCountryInfo(lat, lon, clientX, clientY) {
       <span style="color:#777;font-size:11px">${lat.toFixed(2)}°, ${lon.toFixed(2)}°</span>
       ${closeBtn()}
     </div>
-    <div style="color:#555;margin-top:6px">Søker…</div>
+    <div style="color:#555;margin-top:6px">Loading…</div>
   `)
 
   try {
@@ -117,7 +117,7 @@ async function fetchCountryInfo(lat, lon, clientX, clientY) {
           <span style="font-size:22px">🌊</span>
           ${closeBtn()}
         </div>
-        <div style="font-weight:600;margin:4px 0 2px">Åpent hav</div>
+        <div style="font-weight:600;margin:4px 0 2px">Open sea</div>
         <div style="color:#555;font-size:11px">${lat.toFixed(3)}°, ${lon.toFixed(3)}°</div>
       `)
       return
@@ -126,7 +126,7 @@ async function fetchCountryInfo(lat, lon, clientX, clientY) {
     const country = await getCountry(countryCode)
 
     const flag     = country?.flag ?? ''
-    const name     = country?.translations?.nor?.common ?? country?.name?.common ?? geo.address?.country ?? countryCode
+    const name     = country?.name?.common ?? geo.address?.country ?? countryCode
     const capital  = (country?.capital ?? [])[0] ?? '–'
     const pop      = fmtPop(country?.population ?? 0)
     const area     = fmtArea(country?.area)
@@ -155,7 +155,7 @@ async function fetchCountryInfo(lat, lon, clientX, clientY) {
     console.error('[countryinfo] fetch error:', err)
     render(`
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <span style="color:#e66;font-size:12px">Kunne ikke hente data</span>
+        <span style="color:#e66;font-size:12px">Could not load data</span>
         ${closeBtn()}
       </div>
       <div style="color:#555;font-size:10px;margin-top:4px">${err.message}</div>
