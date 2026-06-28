@@ -3,8 +3,11 @@
 
 import * as THREE from 'three'
 
-// CelesTrak blocks browser requests (403); use Ivan Stanojević TLE API (CORS, free, JSON)
-const TLE_URL   = 'https://tle.ivanstanojevic.me/api/tle/?page-size=100'
+const TLE_BASE = 'https://tle.ivanstanojevic.me/api/tle'
+const TLE_SOURCES = [
+  `${TLE_BASE}/?page-size=100`,                          // ISS, Hubble, Tiangong, …
+  `${TLE_BASE}/?search=STARLINK&page-size=100`,          // SpaceX Starlink
+]
 const R_EARTH   = 6371   // km
 const R_GLOBE   = 100    // Three.js units
 const UPDATE_S  = 30     // recompute positions every 30 s
@@ -113,12 +116,13 @@ function toVec3(lat, lon, alt) {
 
 // ── Rendering helpers ─────────────────────────────────────────────────────────
 
-function altColor(nRevDay) {
+function altColor(nRevDay, name) {
   const n   = nRevDay * 2 * Math.PI / 86400
   const alt = Math.cbrt(398600.4418 / (n * n)) - R_EARTH
-  if (alt < 2000)  return [0.0, 0.8, 1.0]   // LEO — cyan
-  if (alt < 35786) return [0.3, 1.0, 0.5]   // MEO — green
-  return [1.0, 0.85, 0.0]                    // GEO — gold
+  if (name.startsWith('STARLINK')) return [1.0, 1.0, 1.0]  // Starlink — white
+  if (alt < 2000)  return [0.0, 0.8, 1.0]                  // LEO — cyan
+  if (alt < 35786) return [0.3, 1.0, 0.5]                  // MEO — green
+  return [1.0, 0.85, 0.0]                                   // GEO — gold
 }
 
 function recompute() {
@@ -201,18 +205,15 @@ export async function initSatellites(scene, camera, canvas) {
   document.getElementById('canvas-container').appendChild(_tooltip)
   canvas.addEventListener('mousemove', onMouseMove)
 
-  let json
-  try {
-    json = await fetch(TLE_URL).then(r => {
+  const results = await Promise.allSettled(
+    TLE_SOURCES.map(url => fetch(url).then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       return r.json()
-    })
-  } catch (err) {
-    console.warn('[satellites] TLE fetch failed:', err)
-    return
-  }
-
-  _satData = parseTLE(json)
+    }))
+  )
+  const all = results.flatMap(r => r.status === 'fulfilled' ? parseTLE(r.value) : [])
+  if (!all.length) { console.warn('[satellites] all TLE fetches failed'); return }
+  _satData = all
   if (!_satData.length) return
 
   const n    = _satData.length
@@ -220,7 +221,7 @@ export async function initSatellites(scene, camera, canvas) {
   const col  = new Float32Array(n * 3)
 
   for (let i = 0; i < n; i++) {
-    const [r, g, b] = altColor(_satData[i].nRevDay)
+    const [r, g, b] = altColor(_satData[i].nRevDay, _satData[i].name)
     col[i*3] = r; col[i*3+1] = g; col[i*3+2] = b
     pos[i*3+1] = R_GLOBE + 6
   }
