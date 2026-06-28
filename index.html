@@ -22,89 +22,114 @@
       <span class="compass-n">N</span>
       <span class="compass-s">S</span>
     </div>
-    <div id="carousel-wrap">
-      <button id="carousel-prev" class="carousel-btn">&#x25B2;</button>
-      <div id="carousel-viewport">
-    <div id="toggle-stack">
-      <div id="drag-toggle" class="float-toggle" title="Move country (click to select, drag to move)">
-        <span class="toggle-icon">✋</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+    <div id="toggle-groups">
+
+      <div class="toggle-group">
+        <span class="toggle-group-label">Space</span>
+        <div class="toggle-group-grid">
+          <div id="iss-toggle" class="float-toggle" title="ISS — real-time position">
+            <span class="toggle-icon">🛸</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="satellites-toggle" class="float-toggle" title="Satellites in orbit (real-time positions)">
+            <span class="toggle-icon">🛰️</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="solar-toggle" class="float-toggle" title="Solar system">
+            <span class="toggle-icon">🪐</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+        </div>
       </div>
-      <div id="labels-toggle" class="float-toggle" title="Country labels">
-        <span class="toggle-icon">🚩</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+
+      <div class="toggle-group">
+        <span class="toggle-group-label">Geography</span>
+        <div class="toggle-group-grid">
+          <div id="borders-toggle" class="float-toggle" title="Country borders">
+            <span class="toggle-icon">🗺</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="labels-toggle" class="float-toggle" title="Country labels">
+            <span class="toggle-icon">🚩</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="capitals-toggle" class="float-toggle" title="Capitals">
+            <span class="toggle-icon">🏛</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="countryinfo-toggle" class="float-toggle" title="Click on a country for info">
+            <span class="toggle-icon">ℹ️</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="timezones-toggle" class="float-toggle" title="Time zones">
+            <span class="toggle-icon">🕐</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="equator-toggle" class="float-toggle" title="Equator">
+            <span class="toggle-icon">🌐</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+        </div>
       </div>
-<div id="borders-toggle" class="float-toggle" title="Country borders">
-        <span class="toggle-icon">🗺</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+
+      <div class="toggle-group">
+        <span class="toggle-group-label">Nature</span>
+        <div class="toggle-group-grid">
+          <div id="currents-toggle" class="float-toggle" title="Ocean currents">
+            <span class="toggle-icon">🌊</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="weather-toggle" class="float-toggle" title="Click for weather forecast">
+            <span class="toggle-icon">🌡</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="earthquakes-toggle" class="float-toggle" title="Earthquakes & natural disasters (USGS + NASA EONET)">
+            <span class="toggle-icon">🌋</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="tectonic-toggle" class="float-toggle" title="Tectonic plate boundaries">
+            <span class="toggle-icon">🌍</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="aurora-toggle" class="float-toggle" title="Aurora Borealis">
+            <span class="toggle-icon">🌌</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+        </div>
       </div>
-      <div id="transparent-toggle" class="float-toggle" title="Transparent mode">
-        <span class="toggle-icon">👁</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+
+      <div class="toggle-group">
+        <span class="toggle-group-label">Live</span>
+        <div class="toggle-group-grid">
+          <div id="ships-toggle" class="float-toggle" title="Live ship traffic (AIS)">
+            <span class="toggle-icon">🚢</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+        </div>
       </div>
-      <div id="equator-toggle" class="float-toggle" title="Equator">
-        <span class="toggle-icon">🌐</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+
+      <div class="toggle-group">
+        <span class="toggle-group-label">Visuals</span>
+        <div class="toggle-group-grid">
+          <div id="sun-toggle" class="float-toggle" title="Sun (day/night)">
+            <span class="toggle-icon">🌞</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="citylights-toggle" class="float-toggle" title="City lights (best with sun on)">
+            <span class="toggle-icon">🌃</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="transparent-toggle" class="float-toggle" title="Transparent mode">
+            <span class="toggle-icon">👁</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+          <div id="drag-toggle" class="float-toggle" title="Move country (click to select, drag to move)">
+            <span class="toggle-icon">✋</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </div>
+        </div>
       </div>
-      <div id="capitals-toggle" class="float-toggle" title="Capitals">
-        <span class="toggle-icon">🏛</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="solar-toggle" class="float-toggle" title="Solar system">
-        <span class="toggle-icon">🪐</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="sun-toggle" class="float-toggle" title="Sun (day/night)">
-        <span class="toggle-icon">🌞</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="citylights-toggle" class="float-toggle" title="City lights (best with sun on)">
-        <span class="toggle-icon">🌃</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="aurora-toggle" class="float-toggle" title="Aurora Borealis">
-        <span class="toggle-icon">🌌</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="weather-toggle" class="float-toggle" title="Click for weather forecast">
-        <span class="toggle-icon">🌡</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="earthquakes-toggle" class="float-toggle" title="Earthquakes & natural disasters (USGS + NASA EONET)">
-        <span class="toggle-icon">🌋</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="tectonic-toggle" class="float-toggle" title="Tectonic plate boundaries">
-        <span class="toggle-icon">🌍</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="satellites-toggle" class="float-toggle" title="Satellites in orbit (real-time positions)">
-        <span class="toggle-icon">🛰️</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="iss-toggle" class="float-toggle" title="ISS — real-time position">
-        <span class="toggle-icon">🛸</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="countryinfo-toggle" class="float-toggle" title="Click on a country for info">
-        <span class="toggle-icon">ℹ️</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="timezones-toggle" class="float-toggle" title="Time zones">
-        <span class="toggle-icon">🕐</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="currents-toggle" class="float-toggle" title="Ocean currents">
-        <span class="toggle-icon">🌊</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-      <div id="ships-toggle" class="float-toggle" title="Live ship traffic (AIS)">
-        <span class="toggle-icon">🚢</span>
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-      </div>
-    </div>
-      </div>
-      <button id="carousel-next" class="carousel-btn">&#x25BC;</button>
+
     </div>
   </div>
   <div id="panel-stack"></div>

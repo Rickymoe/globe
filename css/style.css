@@ -77,58 +77,50 @@ body {
   pointer-events: none;
 }
 
-/* ── Carousel wrapper ── */
-#carousel-wrap {
+/* ── Toggle groups ── */
+#toggle-groups {
   position: absolute;
   bottom: 24px;
   right: 24px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
+  gap: 6px;
   max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
-#carousel-viewport {
-  overflow: hidden;
-  flex: 1;
-  min-height: 0;
+.toggle-group {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 22px;
-  padding: 6px;
-  touch-action: none;
-}
-
-/* ── Floating toggles ── */
-#toggle-stack {
+  border-radius: 18px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: transform 0.3s ease;
+  gap: 6px;
 }
 
-.carousel-btn {
-  background: rgba(0,0,0,0.55);
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  color: #e0e0e0;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: opacity 0.2s, border-color 0.2s;
-  user-select: none;
-  padding: 0;
+.toggle-group-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.38);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 4px;
 }
 
-.carousel-btn:hover:not(:disabled) { border-color: rgba(255,255,255,0.55); }
-.carousel-btn:disabled { opacity: 0.2; cursor: default; }
+.toggle-group-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.toggle-group-grid .float-toggle:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.toggle-group-grid .float-toggle {
+  padding: 8px 10px;
+  gap: 6px;
+}
 
 .float-toggle {
   display: flex;
