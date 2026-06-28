@@ -183,9 +183,10 @@ async function _connect(apiKey) {
     }))
   }
 
-  _ws.onmessage = (e) => {
+  _ws.onmessage = async (e) => {
     try {
-      const msg  = JSON.parse(e.data)
+      const text = typeof e.data === 'string' ? e.data : await e.data.text()
+      const msg  = JSON.parse(text)
       const meta = msg.MetaData
       const rep  = msg.Message?.PositionReport
       if (!rep || meta?.latitude == null) return
