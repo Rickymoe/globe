@@ -1,17 +1,17 @@
 #!/usr/bin/env node
-// Fetches all Starlink TLE data from tle.ivanstanojevic.me and writes
-// data/starlinks.json — run via GitHub Actions or manually: node scripts/fetch-tle.js
+// Fetches ALL active satellites from tle.ivanstanojevic.me and writes
+// data/satellites.json — run via GitHub Actions or: node scripts/fetch-tle.js
 
-import { createWriteStream, mkdirSync, statSync, writeFileSync } from 'fs'
+import { mkdirSync, statSync, writeFileSync } from 'fs'
 import { get }  from 'https'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const BASE_URL  = 'https://tle.ivanstanojevic.me/api/tle/?search=STARLINK&page-size=100'
-const OUT_FILE  = join(__dirname, '..', 'data', 'starlinks.json')
-const BATCH     = 10
-const DELAY_MS  = 300
+const BASE_URL  = 'https://tle.ivanstanojevic.me/api/tle/?page-size=100'
+const OUT_FILE  = join(__dirname, '..', 'data', 'satellites.json')
+const BATCH     = 3
+const DELAY_MS  = 800
 
 function fetchJson(url) {
   return new Promise((resolve, reject) => {

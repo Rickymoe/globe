@@ -1,4 +1,4 @@
-name: Update Starlink TLE data
+name: Update satellite TLE data
 
 on:
   schedule:
@@ -18,15 +18,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Fetch all Starlink TLE data
+      - name: Fetch all satellite TLE data
         run: node scripts/fetch-tle.js
 
       - name: Commit and push if data changed
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/starlinks.json
+          git add data/satellites.json
           git diff --staged --quiet \
             && echo 'No changes — skipping commit' \
-            || git commit -m "chore: update Starlink TLE data ($(date -u +%Y-%m-%d))"
+            || git commit -m "chore: update satellite TLE data ($(date -u +%Y-%m-%d))"
           git push
