@@ -9,7 +9,8 @@ import { initEarthquakes, setEarthquakesVisible, updateEarthquakes } from './ear
 import { initIss, setIssVisible } from './iss.js'
 import { initTectonic, setTectonicVisible } from './tectonic.js'
 import { initCityLights, setCityLightsVisible, updateCityLights } from './citylights.js'
-import { initAurora, setAuroraVisible, updateAurora } from './aurora.js'
+import { initAurora, setAuroraVisible, updateAurora, setAuroraActivity } from './aurora.js'
+import { initDonki, getAuroraActivity } from './donki.js'
 import { initTimezones, setTimezonesVisible } from './timezones.js'
 import { initMagnetField, setMagnetFieldVisible, updateMagnetField } from './magnetfield.js'
 import { initLabels, setLabelsVisible } from './labels.js'
@@ -48,6 +49,7 @@ initBorders(scene)
   initWeatherClick(getCamera(), getCanvas())
   initCountryInfo(getCamera(), getCanvas())
   initCenterEye(getCamera(), getControls())
+  initDonki().then(() => setAuroraActivity(getAuroraActivity()))
   initSolarSystem(scene)
   initPlanetCompare(scene, getCamera(), getControls())
   initEonet(scene, getCamera(), getCanvas())
