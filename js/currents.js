@@ -33,15 +33,15 @@ const CURRENTS = [
   { name: 'South Equatorial (Atlantic)', type: 'warm', speed: 0.6,
     path: [[2,-5],[-1,-15],[-3,-27],[-4,-34]] },
   { name: 'Agulhas Current', type: 'warm', speed: 0.68, wander: 0.1,
-    path: [[-15,40],[-22,37],[-28,34],[-33,28],[-38,25]] },
+    path: [[-15,43],[-22,39],[-28,36],[-33,30],[-38,27]] },
   { name: 'East Australian Current', type: 'warm', speed: 0.62, wander: 0.1,
     path: [[-15,158],[-22,157],[-28,156],[-33,155],[-38,153],[-42,151]] },
   { name: 'Antarctic Circumpolar', type: 'cold', speed: 0.38,
     // Monotonically increasing longitude (300 = -60°W) — no antimeridian jump
     path: [[-55,-60],[-55,-30],[-55,0],[-55,30],[-55,60],
            [-55,90],[-55,120],[-55,150],[-55,178],[-55,210],[-55,240],[-55,270],[-55,300]] },
-  { name: 'Somali Current', type: 'warm', speed: 0.62,
-    path: [[-2,42],[5,46],[10,51],[14,54]] },
+  { name: 'Somali Current', type: 'warm', speed: 0.62, wander: 0.1,
+    path: [[0,45],[5,50],[10,54],[13,56]] },
   { name: 'Indian South Equatorial', type: 'warm', speed: 0.5,
     path: [[-10,90],[-10,75],[-10,60],[-10,47]] },
 ]
