@@ -20,7 +20,7 @@ const CURRENTS = [
     // Eastward — extend past +180 to avoid Catmull-Rom cutting over Asia
     path: [[45,158],[45,172],[45,182],[45,198],[44,212],[43,225]] },
   { name: 'California Current', type: 'cold', speed: 0.42, wander: 0.1,
-    path: [[55,-128],[50,-126],[45,-124],[38,-122],[30,-116],[22,-108]] },
+    path: [[55,-131],[50,-129],[45,-127],[38,-125],[30,-119],[22,-113]] },
   { name: 'North Equatorial (Pacific)', type: 'warm', speed: 0.55,
     // Westward — extend past -180 to avoid Catmull-Rom cutting over Africa
     path: [[15,-118],[15,-140],[15,-165],[15,-182],[15,-205],[15,-230]] },
