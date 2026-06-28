@@ -144,17 +144,32 @@ async function fetchTrackPoints() {
 function buildTrack(points) {
   if (points.length < 2) return
 
-  const n   = points.length
-  const pos = new Float32Array(n * 3)
-  const col = new Float32Array(n * 3)
+  const STEPS = 40   // subdivisions per segment → smooth arc along sphere
+  const vecs  = points.map(p => latLonToVec3(p.lat, p.lon))
+  const segs  = vecs.length - 1
+  const total = segs * STEPS + 1
 
-  for (let i = 0; i < n; i++) {
-    const v = latLonToVec3(points[i].lat, points[i].lon)
-    pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z
+  const pos = new Float32Array(total * 3)
+  const col = new Float32Array(total * 3)
 
-    const t   = i / (n - 1)       // 0 = oldest, 1 = newest
-    const br  = 0.08 + t * 0.72   // brightness fade: dim tail → bright head
-    col[i*3] = br; col[i*3+1] = br * 0.88; col[i*3+2] = 1.0  // cool blue-white
+  let idx = 0
+  for (let seg = 0; seg < segs; seg++) {
+    const v1    = vecs[seg]
+    const v2    = vecs[seg + 1]
+    const count = seg === segs - 1 ? STEPS + 1 : STEPS
+
+    for (let s = 0; s < count; s++) {
+      const t       = s / STEPS
+      const globalT = (seg * STEPS + s) / (segs * STEPS)
+
+      // Slerp: lerp direction then normalize → stays on sphere at R_ISS
+      const v = v1.clone().lerp(v2, t).normalize().multiplyScalar(R_ISS)
+      pos[idx*3] = v.x; pos[idx*3+1] = v.y; pos[idx*3+2] = v.z
+
+      const br = 0.08 + globalT * 0.72
+      col[idx*3] = br; col[idx*3+1] = br * 0.88; col[idx*3+2] = 1.0
+      idx++
+    }
   }
 
   if (_trackLine) {
