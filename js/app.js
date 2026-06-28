@@ -23,6 +23,7 @@ import { initCenterEye, updateCenterEye } from './center-eye.js'
 import { initStars } from './stars.js'
 import { initSolarSystem, setSolarSystemVisible, updatePlanetScales } from './solar-system.js'
 import { initPlanetCompare, showPlanetPanel, exitPlanetCompare } from './planet-compare.js'
+import { initEonet, setEonetVisible, updateEonet } from './eonet.js'
 
 function main() {
   const container = document.getElementById('canvas-container')
@@ -49,6 +50,7 @@ initBorders(scene)
   initCenterEye(getCamera(), getControls())
   initSolarSystem(scene)
   initPlanetCompare(scene, getCamera(), getControls())
+  initEonet(scene, getCamera(), getCanvas())
 
   const needle = document.getElementById('compass-needle')
 
@@ -74,6 +76,7 @@ initBorders(scene)
     onTectonic: setTectonicVisible,
     onCountryInfo: setCountryInfoEnabled,
     onTimezones: setTimezonesVisible,
+    onEonet: setEonetVisible,
     onReset: resetCamera,
   })
 
@@ -87,6 +90,7 @@ initBorders(scene)
     updateAtmGlow(camDist)
     updateAurora(delta)
     updateMagnetField(delta)
+    updateEonet(delta)
     updateCenterEye(delta)
   })
 }
