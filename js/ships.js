@@ -188,29 +188,32 @@ async function _connect(apiKey) {
       const text = typeof e.data === 'string' ? e.data : await e.data.text()
       const msg  = JSON.parse(text)
       const meta = msg.MetaData
-      const rep  = msg.Message?.PositionReport
-      if (!rep || meta?.latitude == null) return
+      if (!meta?.MMSI) return
 
       const mmsi     = meta.MMSI
       const existing = _vessels.get(mmsi) ?? {}
 
       if (msg.MessageType === 'ShipStaticData') {
         const s = msg.Message?.ShipStaticData
+        if (!s) return
         _vessels.set(mmsi, {
           ...existing,
           mmsi,
-          name:     s?.Name?.trim() || meta.ShipName?.trim() || existing.name,
-          shipType: s?.Type ?? existing.shipType ?? 0,
+          name:     s.Name?.trim() || meta.ShipName?.trim() || existing.name,
+          shipType: s.Type ?? existing.shipType ?? 0,
+          lat:      existing.lat ?? meta.latitude ?? null,
+          lon:      existing.lon ?? meta.longitude ?? null,
         })
       } else {
         // PositionReport
+        if (meta.latitude == null) return
         _vessels.set(mmsi, {
           ...existing,
           mmsi,
           lat:  meta.latitude,
           lon:  meta.longitude,
           name: meta.ShipName?.trim() || existing.name,
-          sog:  rep?.Sog,
+          sog:  msg.Message?.PositionReport?.Sog,
         })
       }
       _dirty = true
