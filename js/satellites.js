@@ -259,7 +259,6 @@ export async function initSatellites(scene, camera, canvas) {
     return new THREE.Points(geo, new THREE.PointsMaterial({
       size: 3, map: _circleTex, alphaTest: 0.5,
       sizeAttenuation: true, vertexColors: true,
-      transparent: true, opacity: 0.9, depthTest: false,
     }))
   }
 
