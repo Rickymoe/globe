@@ -162,8 +162,8 @@ function buildTrack(points) {
       const t       = s / STEPS
       const globalT = (seg * STEPS + s) / (segs * STEPS)
 
-      // Slerp: lerp direction then normalize → stays on sphere at R_ISS
-      const v = v1.clone().lerp(v2, t).normalize().multiplyScalar(R_ISS)
+      // Ground track: project onto surface so globe occludes the back side
+      const v = v1.clone().lerp(v2, t).normalize().multiplyScalar(100.5)
       pos[idx*3] = v.x; pos[idx*3+1] = v.y; pos[idx*3+2] = v.z
 
       const br = 0.08 + globalT * 0.72
