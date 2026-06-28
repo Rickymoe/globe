@@ -1,0 +1,185 @@
+import * as THREE from 'three'
+
+const R = 101.2          // just above globe surface
+const PER = 55           // particles per current
+const SPEED_SCALE = 0.022
+
+// [lat, lon] waypoints · type: warm|cold · speed: relative 0–1
+const CURRENTS = [
+  { name: 'Gulf Stream', type: 'warm', speed: 1.0,
+    path: [[25,-80],[30,-79],[35,-75],[40,-68],[45,-58],[50,-45],[55,-35],[60,-20],[62,-8]] },
+  { name: 'North Atlantic Drift', type: 'warm', speed: 0.5,
+    path: [[60,-20],[62,-10],[65,0],[68,10],[70,20]] },
+  { name: 'Labrador Current', type: 'cold', speed: 0.45,
+    path: [[65,-56],[60,-54],[55,-52],[50,-48],[43,-46]] },
+  { name: 'Kuroshio', type: 'warm', speed: 0.88,
+    path: [[20,130],[25,133],[30,137],[35,141],[40,148],[45,158]] },
+  { name: 'North Pacific Current', type: 'warm', speed: 0.45,
+    path: [[45,158],[45,172],[44,-178],[44,-162],[43,-148],[42,-135]] },
+  { name: 'California Current', type: 'cold', speed: 0.42,
+    path: [[55,-132],[50,-130],[45,-127],[38,-124],[30,-118],[22,-110]] },
+  { name: 'North Equatorial (Pacific)', type: 'warm', speed: 0.55,
+    path: [[15,-118],[15,-140],[15,-165],[15,178],[15,155],[15,130]] },
+  { name: 'Humboldt Current', type: 'cold', speed: 0.5,
+    path: [[-40,-75],[-30,-78],[-20,-80],[-10,-82],[0,-84]] },
+  { name: 'Brazil Current', type: 'warm', speed: 0.52,
+    path: [[-5,-35],[-15,-39],[-25,-46],[-35,-55],[-40,-60]] },
+  { name: 'South Equatorial (Atlantic)', type: 'warm', speed: 0.6,
+    path: [[5,-15],[2,-25],[-1,-35],[-4,-46],[-6,-55]] },
+  { name: 'Agulhas Current', type: 'warm', speed: 0.68,
+    path: [[-15,40],[-22,37],[-28,34],[-33,28],[-38,25]] },
+  { name: 'East Australian Current', type: 'warm', speed: 0.62,
+    path: [[-15,155],[-22,154],[-28,154],[-33,153],[-38,151],[-42,149]] },
+  { name: 'Antarctic Circumpolar', type: 'cold', speed: 0.38,
+    path: [[-55,-60],[-55,-30],[-55,0],[-55,30],[-55,60],
+           [-55,90],[-55,120],[-55,150],[-55,178],[-55,-150],[-55,-120],[-55,-90],[-55,-60]] },
+  { name: 'Somali Current', type: 'warm', speed: 0.62,
+    path: [[-2,42],[5,46],[10,51],[15,57]] },
+  { name: 'Indian South Equatorial', type: 'warm', speed: 0.5,
+    path: [[-10,90],[-10,75],[-10,60],[-10,47],[-8,45]] },
+]
+
+const WARM_COL = new THREE.Color(1.0, 0.42, 0.08)
+const COLD_COL = new THREE.Color(0.08, 0.65, 1.0)
+
+let _group = null
+let _points = null
+let _particles = []   // { c, t, speed, phase }
+let _time = 0
+
+// ── Geometry helpers ──────────────────────────────────────────────────────────
+
+function toVec3(lat, lon) {
+  const phi   = (90 - lat) * Math.PI / 180
+  const theta = (lon + 180) * Math.PI / 180
+  return new THREE.Vector3(
+    -R * Math.sin(phi) * Math.cos(theta),
+     R * Math.cos(phi),
+     R * Math.sin(phi) * Math.sin(theta),
+  )
+}
+
+// Catmull-Rom spline along [lat,lon] waypoints, t ∈ [0,1]
+function samplePath(path, t, loop) {
+  const pts = loop ? [...path, path[0]] : path
+  const n   = pts.length - 1
+  const s   = Math.min(t * n, n - 0.0001)
+  const i   = Math.floor(s)
+  const f   = s - i
+  const p0  = pts[Math.max(0, i - 1)]
+  const p1  = pts[i]
+  const p2  = pts[Math.min(n, i + 1)]
+  const p3  = pts[Math.min(n, i + 2)]
+  const f2  = f * f, f3 = f2 * f
+  const cr  = (a, b, c, d) =>
+    0.5 * ((2*b) + (-a+c)*f + (2*a-5*b+4*c-d)*f2 + (-a+3*b-3*c+d)*f3)
+  return [cr(p0[0],p1[0],p2[0],p3[0]), cr(p0[1],p1[1],p2[1],p3[1])]
+}
+
+// Perpendicular direction at t (for sideways wander)
+function perpAt(path, t) {
+  const a = samplePath(path, Math.max(0, t - 0.01), false)
+  const b = samplePath(path, Math.min(1, t + 0.01), false)
+  const dlat = b[0] - a[0], dlon = b[1] - a[1]
+  const len  = Math.sqrt(dlat*dlat + dlon*dlon) || 1
+  return [-dlon / len, dlat / len]   // 90° rotation
+}
+
+// ── Glow texture ──────────────────────────────────────────────────────────────
+
+function makeGlowTex() {
+  const c   = document.createElement('canvas')
+  c.width = c.height = 32
+  const ctx = c.getContext('2d')
+  const g   = ctx.createRadialGradient(16, 16, 0, 16, 16, 14)
+  g.addColorStop(0,   'rgba(255,255,255,1)')
+  g.addColorStop(0.3, 'rgba(255,255,255,0.9)')
+  g.addColorStop(0.7, 'rgba(255,255,255,0.3)')
+  g.addColorStop(1,   'rgba(255,255,255,0)')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, 32, 32)
+  return new THREE.CanvasTexture(c)
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
+export function initCurrents(scene) {
+  _group = new THREE.Group()
+  _group.visible = false
+  scene.add(_group)
+
+  const total = CURRENTS.length * PER
+  const pos   = new Float32Array(total * 3)
+  const col   = new Float32Array(total * 3)
+
+  for (let c = 0; c < CURRENTS.length; c++) {
+    const cur  = CURRENTS[c]
+    const loop = cur.name === 'Antarctic Circumpolar'
+    const base = cur.type === 'warm' ? WARM_COL : COLD_COL
+    for (let p = 0; p < PER; p++) {
+      const idx = c * PER + p
+      _particles.push({
+        c, loop,
+        t:     p / PER,
+        speed: cur.speed * (0.82 + Math.random() * 0.36),
+        phase: Math.random() * Math.PI * 2,
+      })
+      col[idx*3]   = base.r
+      col[idx*3+1] = base.g
+      col[idx*3+2] = base.b
+    }
+  }
+
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3))
+
+  _points = new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 2.2, map: makeGlowTex(),
+    alphaTest: 0.02, sizeAttenuation: true,
+    vertexColors: true,
+    transparent: true, opacity: 0.9,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }))
+  _points.renderOrder = 3
+  _group.add(_points)
+
+  _tick(0)
+}
+
+function _tick(delta) {
+  _time += delta
+  const pos = _points.geometry.attributes.position
+  const col = _points.geometry.attributes.color
+
+  for (let i = 0; i < _particles.length; i++) {
+    const p   = _particles[i]
+    p.t = (p.t + p.speed * SPEED_SCALE * delta) % 1
+
+    const cur     = CURRENTS[p.c]
+    const [lat, lon] = samplePath(cur.path, p.t, p.loop)
+
+    // Gentle sine-wave wander perpendicular to current
+    const wander       = Math.sin(_time * 0.25 + p.phase) * 0.25
+    const [dlat, dlon] = perpAt(cur.path, p.t)
+
+    const v = toVec3(lat + dlat * wander, lon + dlon * wander)
+    pos.setXYZ(i, v.x, v.y, v.z)
+
+    // Pulse brightness for breathing effect
+    const pulse = 0.75 + 0.25 * Math.sin(_time * 1.2 + p.phase)
+    const base  = cur.type === 'warm' ? WARM_COL : COLD_COL
+    col.setXYZ(i, base.r * pulse, base.g * pulse, base.b * pulse)
+  }
+
+  pos.needsUpdate = true
+  col.needsUpdate = true
+}
+
+export function updateCurrents(delta) {
+  if (_group?.visible) _tick(delta)
+}
+
+export function setCurrentsVisible(v) {
+  if (_group) _group.visible = v
+}
