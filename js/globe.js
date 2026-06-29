@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { VRButton } from 'three/addons/webxr/VRButton.js'
 
 let _scene, _camera, _renderer, _controls, _clock
 let _resetting = false
@@ -56,7 +57,18 @@ export function initScene(container) {
   _renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
   _renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   _renderer.setSize(w, h)
+  _renderer.xr.enabled = true
   container.appendChild(_renderer.domElement)
+  document.body.appendChild(VRButton.createButton(_renderer))
+
+  // Offset XR reference space so viewer starts at the default camera distance
+  _renderer.xr.addEventListener('sessionstart', () => {
+    const refSpace = _renderer.xr.getReferenceSpace()
+    if (refSpace?.getOffsetReferenceSpace) {
+      const offset = new XRRigidTransform({ x: 0, y: -1.6, z: 280 })
+      _renderer.xr.setReferenceSpace(refSpace.getOffsetReferenceSpace(offset))
+    }
+  })
 
   _controls = new OrbitControls(_camera, _renderer.domElement)
   _controls.enableDamping = true
@@ -240,16 +252,17 @@ export function getCompassAngle() {
 
 export function startLoop(onFrame) {
   if (!_clock) throw new Error('initScene must be called before startLoop')
-  let rafId
-  function animate() {
-    rafId = requestAnimationFrame(animate)
+  _renderer.setAnimationLoop(() => {
     const delta = _clock.getDelta()
-    if (_resetting) {
-      _camera.position.lerp(DEFAULT_CAM, 0.08)
-      if (_camera.position.distanceTo(DEFAULT_CAM) < 0.5) {
-        _camera.position.copy(DEFAULT_CAM)
-        _resetting = false
+    if (!_renderer.xr.isPresenting) {
+      if (_resetting) {
+        _camera.position.lerp(DEFAULT_CAM, 0.08)
+        if (_camera.position.distanceTo(DEFAULT_CAM) < 0.5) {
+          _camera.position.copy(DEFAULT_CAM)
+          _resetting = false
+        }
       }
+      _controls.update()
     }
     if (_sunLight?.visible) {
       const m = new Date().getUTCMinutes()
@@ -261,14 +274,12 @@ export function startLoop(onFrame) {
         _moon?.position.copy(calcMoonPosition())
       }
     }
-    _controls.update()
     if (_apolloMarker && _moon) {
       _toEarth.set(0, 0, 0).sub(_moon.position).normalize()
       _apolloMarker.position.copy(_moon.position).addScaledVector(_toEarth, 9.5)
     }
     onFrame(delta)
     _renderer.render(_scene, _camera)
-  }
-  animate()
-  return () => cancelAnimationFrame(rafId)
+  })
+  return () => _renderer.setAnimationLoop(null)
 }
