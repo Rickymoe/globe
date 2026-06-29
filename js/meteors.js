@@ -25,7 +25,6 @@ const MAX_ACTIVE = 60    // max simultaneous meteor lines
 const SPORADIC_RATE = 0.1  // meteors/sec always on
 
 // ── Module state ──────────────────────────────────────────────────────────────
-let _scene     = null
 let _group     = null
 let _panel     = null
 let _sprite    = null
@@ -194,7 +193,6 @@ function _updatePanel(active) {
   if (!_panel || _panel.style.display === 'none') return
   if (active) {
     const s        = active.shower
-    const peakStr  = `${s.peak[2] ?? s.peak[1]}. ${MONTHS_SHORT[s.peak[0] - 1]}`  // "12. Aug"
     const dayStr   = `${s.peak[1]}. ${MONTHS_SHORT[s.peak[0] - 1]}`
     const diff     = active.today - active.peakDoy
     const daysStr  = diff === 0 ? 'Peak today!'
@@ -221,8 +219,6 @@ function _updatePanel(active) {
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export function initMeteors(scene) {
-  _scene = scene
-
   _group         = new THREE.Group()
   _group.visible = false
   scene.add(_group)
@@ -237,6 +233,7 @@ export function initMeteors(scene) {
   })
   _sprite         = new THREE.Sprite(spriteMat)
   _sprite.scale.setScalar(25)
+  _sprite.frustumCulled = false
   _sprite.visible = false
   scene.add(_sprite)
 
@@ -268,11 +265,11 @@ export function updateMeteors(delta) {
 
   // Spawn
   _spawnAccum += delta * _currentRate(active)
+  if (_spawnAccum > 2) _spawnAccum = 2  // safety: clamp before loop
   while (_spawnAccum >= 1 && _active.length < MAX_ACTIVE) {
     _spawnAccum -= 1
     _active.push(_spawnMeteor(active))
   }
-  if (_spawnAccum > 2) _spawnAccum = 0  // safety: don't burst-spawn after pause
 
   // Update and cull
   const toRemove = []
