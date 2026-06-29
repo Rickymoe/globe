@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Prepare deploy directory
         env:
@@ -20,6 +22,13 @@ jobs:
         run: |
           cp -r . /tmp/deploy
           echo "{\"aisApiKey\":\"$AIS_KEY\"}" > /tmp/deploy/data/config.json
+
+      - name: Restore ships snapshot
+        run: |
+          git fetch origin gh-pages
+          git show origin/gh-pages:data/ships.json > /tmp/deploy/data/ships.json 2>/dev/null \
+            && echo 'ships.json restored from gh-pages' \
+            || echo 'ships.json not found on gh-pages — skipping'
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
