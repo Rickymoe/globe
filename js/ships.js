@@ -108,12 +108,16 @@ function _updatePanel(generated) {
   const pleasure = all.filter(v => v.shipType === 37 || v.shipType === 36).length
   const tug     = all.filter(v => v.shipType === 31 || v.shipType === 32 || v.shipType === 52).length
 
-  const timeStr = generated
-    ? new Date(generated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const updatedStr = generated
+    ? new Date(generated).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' })
+      + ' ' + new Date(generated).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
     : '—'
 
   _panel.innerHTML = `
-    <div style="font-size:18px;font-weight:600">🚢 ${total.toLocaleString()} vessels · updated ${timeStr}</div>
+    <div style="display:flex;align-items:baseline;gap:0.5rem">
+      <span style="font-size:18px;font-weight:600">🚢 ${total.toLocaleString('nb-NO')} vessels</span>
+      <span style="font-size:11px;color:#888">Updated ${updatedStr}</span>
+    </div>
     <div style="display:flex;gap:0.8rem;font-size:12px;flex-wrap:wrap">
       <span style="color:#4488ff">⬤ ${cargo} cargo</span>
       <span style="color:#ff8822">⬤ ${tanker} tanker</span>
